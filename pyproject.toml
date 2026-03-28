@@ -1,0 +1,9 @@
+[project]
+name = "tmgit-py"
+version = "0.1.0"
+description = "Máquina do tempo usando git — reescrita em Python do projeto tmgit"
+requires-python = ">=3.14"
+dependencies = [
+    "gitpython>=3.1",
+]
+
