@@ -185,3 +185,13 @@ Usar emojis semânticos no início da mensagem:
 - Código em português (comentários e mensagens), nomes de variáveis e funções em inglês
 - Commits pequenos por função implementada
 - Não implementar tudo de uma vez — uma função por sessão
+- A função principal de cada fase deve ter o mesmo nome da fase: `preflight()`, `climb()`, `fly()`, `land()`
+- O fluxo completo legível no main.py deve ser: `preflight() → climb() → fly() → land()`
+
+### Como usar este arquivo no Copilot Chat
+
+O Copilot Chat **não injeta o CONTEXT.md automaticamente**. Para garantir que o agente tenha contexto do projeto, sempre inicie uma nova sessão com:
+
+```
+@CONTEXT.md Vamos trabalhar no tmgit-py. [sua instrução aqui]
+```
