@@ -119,6 +119,63 @@ O `etckeeper` é a ferramenta mais próxima conceitualmente — versiona diretó
 
 ---
 
+## Git flow
+
+O projeto usa um fluxo baseado em branches, mesmo sendo desenvolvimento solo. O objetivo é aprender git flow na prática e manter histórico legível.
+
+### Estrutura de branches
+
+```
+master          # código estável — só recebe merges vindos da develop
+└── develop     # integração contínua do desenvolvimento
+    ├── feature/land-py
+    ├── feature/preflight-py
+    ├── feature/climb-py
+    └── feature/fly-py
+```
+
+### Regras obrigatórias
+
+- **Nunca** commitar direto na `master`
+- **Nunca** commitar direto na `develop`
+- Cada arquivo do padrão modo-avião vira uma branch `feature/`
+- Ao terminar uma feature → merge na `develop`
+- Quando `develop` estiver estável → merge na `master` com tag de versão
+
+### Ciclo de uma feature
+
+```bash
+# Criar branch a partir da develop
+git checkout develop
+git checkout -b feature/nome-da-feature
+
+# Desenvolver e commitar
+git add arquivo.py
+git commit -m ":sparkles: Descrição do que foi feito"
+
+# Ao terminar, merge na develop
+git checkout develop
+git merge feature/nome-da-feature
+git branch -d feature/nome-da-feature
+```
+
+### Convenção de mensagens de commit
+
+Usar emojis semânticos no início da mensagem:
+
+| Emoji | Código | Uso |
+|---|---|---|
+| 🎉 | `:tada:` | Início de projeto |
+| ✨ | `:sparkles:` | Nova feature |
+| 🐛 | `:bug:` | Correção de bug |
+| ♻️ | `:recycle:` | Refatoração |
+| 🔧 | `:wrench:` | Configuração |
+| 🙈 | `:see_no_evil:` | Ajuste de .gitignore |
+| 📝 | `:memo:` | Documentação |
+| 🏷️ | `:label:` | Nova versão/tag |
+
+---
+
 ## Instruções para o modelo (aider/LLM)
 
 - Sempre seguir o padrão modo-avião: cada fase em seu arquivo
