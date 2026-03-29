@@ -189,6 +189,18 @@ Usar emojis semânticos no início da mensagem:
 - O fluxo completo legível no main.py deve ser: `preflight() → climb() → fly() → land()`
 - **Consistência de caminhos:** sempre reutilizar variáveis de caminho já calculadas. Exemplo: usar `os.path.join(tmgit_dir, 'index.lock')` em vez de reconstruir `os.path.join(tmgit_tree, '.tmgit', '.git', 'index.lock')`. Se uma variável de caminho já existe, usá-la como base para caminhos derivados.
 
+### Sobre o SESSION.md
+
+O projeto mantém um arquivo `SESSION.md` que registra o estado atual do desenvolvimento: branch ativa, arquivos implementados, próximas ações e decisões tomadas.
+
+**O SESSION.md deve ser atualizado:**
+- Após cada commit relevante
+- Ao iniciar ou encerrar uma feature branch
+- Sempre que uma decisão arquitetural for tomada
+- Ao final de cada sessão de trabalho
+
+O `SESSION.md` é o ponto de entrada para retomar o projeto em uma nova sessão — qualquer agente ou desenvolvedor deve consultá-lo antes de qualquer ação.
+
 ### Como usar este arquivo no Copilot Chat
 
 O Copilot Chat **não injeta o CONTEXT.md automaticamente**. Para garantir que o agente tenha contexto do projeto, sempre inicie uma nova sessão com:
