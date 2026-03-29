@@ -187,6 +187,7 @@ Usar emojis semânticos no início da mensagem:
 - Não implementar tudo de uma vez — uma função por sessão
 - A função principal de cada fase deve ter o mesmo nome da fase: `preflight()`, `climb()`, `fly()`, `land()`
 - O fluxo completo legível no main.py deve ser: `preflight() → climb() → fly() → land()`
+- **Consistência de caminhos:** sempre reutilizar variáveis de caminho já calculadas. Exemplo: usar `os.path.join(tmgit_dir, 'index.lock')` em vez de reconstruir `os.path.join(tmgit_tree, '.tmgit', '.git', 'index.lock')`. Se uma variável de caminho já existe, usá-la como base para caminhos derivados.
 
 ### Como usar este arquivo no Copilot Chat
 
