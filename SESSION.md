@@ -20,34 +20,29 @@ feature/climb-py ← próxima a criar
 | `land.py` | ✅ Completo, mergeado na develop | feature/land-py |
 | `preflight.py` | ✅ Completo, mergeado na develop | feature/preflight-py |
 | `climb.py` | ✅ Completo, aguarda commit e merge | feature/climb-py |
-| `fly.py` | ❌ Não iniciado | — |
+| `fly.py` | ✅ Completo, aguarda commit e merge | feature/fly-py |
 | `main.py` | ⚠️ Mínimo (só print), precisa orquestrar as fases | — |
 
 ---
 
 ## Próximas ações imediatas
 
-### 1. Criar feature/climb-py
+### 1. Commitar e mergear fly.py
 ```bash
+cp ~/Downloads/SESSION.md ~/git/github/elisboa/tmgit-py/SESSION.md
+git add fly.py SESSION.md
+git commit -m ":sparkles: Implementa fase fly (commit, tag, push)"
+git push origin feature/fly-py
 git checkout develop
-git checkout -b feature/climb-py
-```
-
-### 2. Implementar climb.py (prompt para o Copilot abaixo)
-
-### 3. Merge da feature/climb-py na develop
-```bash
-git checkout develop
-git merge feature/climb-py
+git merge feature/fly-py
 git push origin develop
 ```
 
-### 4. Criar feature/fly-py (após climb)
+### 2. Atualizar main.py
 ```bash
-git checkout -b feature/fly-py
+git checkout -b feature/main-py
 ```
 
-### 5. Atualizar main.py (após todas as fases)
 O `main.py` atual tem apenas um print. Precisará importar e orquestrar:
 ```python
 from preflight import preflight
@@ -58,11 +53,22 @@ from land import land
 def main():
     context = preflight()
     context = climb(context)
-    fly(context)
+    context = fly(context)
+    land(context['land_errlvl'], context['land_caller'],
+         context['land_msg'], context['land_errmsg'])
 
 if __name__ == "__main__":
     main()
 ```
+
+### 3. Teste de integração básico
+Após o main.py, testar o fluxo completo:
+```bash
+uv run python tmgit.py ~/tmp/teste-tmgit
+```
+
+### 4. Criar pasta tests/ e escrever testes pytest
+Derivar testes das especificações DADO/QUANDO/ENTÃO do CONTEXT.md.
 
 ---
 
