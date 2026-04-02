@@ -88,6 +88,123 @@ tmgit-py/
 
 ---
 
+## Metodologia: Specification Driven Development (SDD)
+
+O projeto adota SDD como metodologia de desenvolvimento. A especificação do comportamento esperado é escrita **antes** do código — o código é escrito para satisfazê-la.
+
+### Fonte de especificações
+
+As especificações derivam de três fontes já existentes no projeto:
+1. Este `CONTEXT.md` — comportamento esperado de cada fase
+2. Os scripts shell de referência (`fm_preflight.sh`, `fm_climb.sh` etc.) — especificações vivas
+3. O guia modo-avião — contratos entre as fases
+
+### Formato de especificação
+
+Cada fase deve ter suas especificações escritas no formato DADO/QUANDO/ENTÃO antes da implementação:
+
+```
+DADO que [condição inicial]
+QUANDO [ação executada]
+ENTÃO [resultado esperado]
+```
+
+### Especificações por fase
+
+#### land()
+```
+DADO error_level=0, caller="preflight", message="ok", error_message=""
+QUANDO land() for chamado
+ENTÃO deve exibir caller e message e encerrar com sys.exit(0)
+
+DADO error_level=1, caller="preflight", message="erro", error_message="git não encontrado"
+QUANDO land() for chamado
+ENTÃO deve exibir caller, message e error_message e encerrar com sys.exit(1)
+```
+
+#### preflight()
+```
+DADO que nenhum argumento foi passado
+QUANDO preflight() for chamado
+ENTÃO deve chamar land() com error_level=1 e mensagem de uso
+
+DADO que o diretório passado não existe
+QUANDO preflight() for chamado
+ENTÃO deve chamar land() com error_level=1 e mensagem de diretório inválido
+
+DADO que o git não está instalado
+QUANDO preflight() for chamado
+ENTÃO deve chamar land() com error_level=1 e mensagem de git não encontrado
+
+DADO que existe um arquivo index.lock no tmgit_dir
+QUANDO preflight() for chamado
+ENTÃO deve chamar land() com error_level=1 e mensagem de lock existente
+
+DADO que todos os requisitos estão satisfeitos
+QUANDO preflight() for chamado
+ENTÃO deve retornar dicionário de contexto com todas as variáveis inicializadas
+```
+
+#### climb()
+```
+DADO que o repositório não existe
+QUANDO climb() for chamado
+ENTÃO deve criar tmgit_dir e inicializar git
+
+DADO que o .gitignore não existe
+QUANDO climb() for chamado
+ENTÃO deve criar .gitignore com * como conteúdo
+
+DADO que a branch do dia não existe
+QUANDO climb() for chamado
+ENTÃO deve criar a branch no formato AAAA.MM.DD
+
+DADO que a branch do dia já existe
+QUANDO climb() for chamado
+ENTÃO deve apenas trocar para ela sem recriar
+```
+
+#### fly()
+```
+DADO que há arquivos modificados rastreados
+QUANDO fly() for chamado
+ENTÃO deve commitar com mensagem contendo commit_date
+
+DADO que o working tree está limpo
+QUANDO fly() for chamado
+ENTÃO deve encerrar sem erro sem tentar commitar
+
+DADO que push-remote foi solicitado
+QUANDO fly() for chamado
+ENTÃO deve fazer push para todos os remotos configurados
+```
+
+### Ciclo SDD por feature
+
+```
+1. Escrever especificações DADO/QUANDO/ENTÃO
+2. Revisar especificações com o Claude (Project Manager)
+3. Gerar prompt para o Copilot baseado nas especificações
+4. Revisar código gerado contra as especificações
+5. Escrever testes pytest derivados das especificações
+6. Commitar especificações, código e testes juntos
+```
+
+### Testes
+
+Os testes ficam em `tests/` e derivam diretamente das especificações:
+
+```
+tmgit-py/
+└── tests/
+    ├── test_land.py
+    ├── test_preflight.py
+    ├── test_climb.py
+    └── test_fly.py
+```
+
+---
+
 ## Comparativo com ferramentas similares
 
 ### etckeeper
