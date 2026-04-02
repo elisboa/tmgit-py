@@ -62,6 +62,24 @@ git checkout -b feature/tests
 mkdir tests
 ```
 
+### 5. Feature: add-file e del-file (v0.2.0)
+```bash
+git checkout develop
+git checkout -b feature/add-del-file
+```
+
+Implementar suporte aos comandos opcionais:
+- `main.py /diretorio add-file /caminho/arquivo`
+- `main.py /diretorio del-file /caminho/arquivo`
+
+Mudanças necessárias:
+- `preflight.py` — detectar argumentos extras e adicionar ao contexto:
+  `context['command']` e `context['command_target']`
+- `fly.py` — implementar `add_file()` e `del_file()` e executar
+  antes do commit quando comando estiver no contexto
+
+Especificações SDD a escrever no CONTEXT.md antes de codar.
+
 ---
 
 ## Setup do ambiente (caso precise reconfigurar)
