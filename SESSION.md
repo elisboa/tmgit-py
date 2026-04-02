@@ -21,54 +21,46 @@ feature/climb-py ← próxima a criar
 | `preflight.py` | ✅ Completo, mergeado na develop | feature/preflight-py |
 | `climb.py` | ✅ Completo, aguarda commit e merge | feature/climb-py |
 | `fly.py` | ✅ Completo, aguarda commit e merge | feature/fly-py |
-| `main.py` | ⚠️ Mínimo (só print), precisa orquestrar as fases | — |
+| `main.py` | ✅ Completo, aguarda commit e merge | feature/main-py |
 
 ---
 
 ## Próximas ações imediatas
 
-### 1. Commitar e mergear fly.py
+### 1. Commitar e mergear main.py
 ```bash
 cp ~/Downloads/SESSION.md ~/git/github/elisboa/tmgit-py/SESSION.md
-git add fly.py SESSION.md
-git commit -m ":sparkles: Implementa fase fly (commit, tag, push)"
-git push origin feature/fly-py
+git add main.py SESSION.md
+git commit -m ":sparkles: Implementa main.py orquestrando as quatro fases"
+git push origin feature/main-py
 git checkout develop
-git merge feature/fly-py
+git merge feature/main-py
 git push origin develop
 ```
 
-### 2. Atualizar main.py
+### 2. Teste de integração básico
+Após o merge, testar o fluxo completo com um diretório temporário:
 ```bash
-git checkout -b feature/main-py
+mkdir -p /tmp/teste-tmgit
+uv run python main.py /tmp/teste-tmgit
 ```
 
-O `main.py` atual tem apenas um print. Precisará importar e orquestrar:
-```python
-from preflight import preflight
-from climb import climb
-from fly import fly
-from land import land
-
-def main():
-    context = preflight()
-    context = climb(context)
-    context = fly(context)
-    land(context['land_errlvl'], context['land_caller'],
-         context['land_msg'], context['land_errmsg'])
-
-if __name__ == "__main__":
-    main()
-```
-
-### 3. Teste de integração básico
-Após o main.py, testar o fluxo completo:
+### 3. Merge da develop na master (primeiro MVP)
+Se o teste passar:
 ```bash
-uv run python tmgit.py ~/tmp/teste-tmgit
+git checkout master
+git merge develop
+git tag -a v0.1.0 -m ":label: Primeiro MVP funcional"
+git push origin master --follow-tags
 ```
 
 ### 4. Criar pasta tests/ e escrever testes pytest
-Derivar testes das especificações DADO/QUANDO/ENTÃO do CONTEXT.md.
+Derivar testes das especificações DADO/QUANDO/ENTÃO do CONTEXT.md:
+```bash
+git checkout develop
+git checkout -b feature/tests
+mkdir tests
+```
 
 ---
 
