@@ -23,15 +23,15 @@ def commit_files(repo, commit_date: str) -> bool:
         # Working tree limpo — nenhum commit necessário
         return False
 
-    # Obter lista de arquivos modificados rastreados
-    modified_files = [item[0] for item in repo.index.diff(None)]
+    # Obter lista de arquivos rastreados no index
+    tracked_files = [path for path, _ in repo.index.entries.keys()]
 
     # Preparar mensagem de commit
-    commit_message = f"{', '.join(modified_files) if modified_files else 'Arquivos modificados'}\n\nCommit automático realizado às {commit_date}"
+    commit_message = f"{', '.join(tracked_files) if tracked_files else 'Arquivos rastreados'}\n\nCommit automático realizado às {commit_date}"
 
     try:
-        # Fazer git add nos arquivos modificados rastreados
-        repo.index.add(modified_files if modified_files else ['.'])
+        # Fazer git add nos arquivos rastreados
+        repo.index.add(tracked_files)
         # Commitar com a mensagem
         repo.index.commit(commit_message)
         return True
@@ -49,7 +49,7 @@ def tag_commit(repo, commit_date: str) -> None:
 
     try:
         # Aplicar tag leve (lightweight tag) no commit atual
-        repo.create_tag(commit_date, ref='HEAD', message=None)
+        repo.create_tag(commit_date)
     except GitCommandError as e:
         raise Exception(f"Erro ao criar tag: {str(e)}")
 
