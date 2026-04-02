@@ -19,7 +19,7 @@ feature/climb-py ← próxima a criar
 |---|---|---|
 | `land.py` | ✅ Completo, mergeado na develop | feature/land-py |
 | `preflight.py` | ✅ Completo, mergeado na develop | feature/preflight-py |
-| `climb.py` | ❌ Não iniciado | — |
+| `climb.py` | ✅ Completo, aguarda commit e merge | feature/climb-py |
 | `fly.py` | ❌ Não iniciado | — |
 | `main.py` | ⚠️ Mínimo (só print), precisa orquestrar as fases | — |
 
