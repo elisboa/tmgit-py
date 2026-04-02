@@ -31,20 +31,22 @@ def climb(context: dict) -> dict:
         try:
             repo = Repo(tmgit_dir)
         except InvalidGitRepositoryError:
-            # Repositório não existe — criar diretório e inicializar git
+            # Repositório não existe — criar com separate_git_dir
             os.makedirs(tmgit_dir, exist_ok=True)
-            repo = Repo.init(tmgit_dir)
+            repo = Repo.init(tmgit_tree, separate_git_dir=tmgit_dir)
 
         # 2. Verificar e criar .gitignore se não existir
-        gitignore_path = os.path.join(tmgit_dir, 'info', 'exclude')
-        gitignore_parent = os.path.dirname(gitignore_path)
-        os.makedirs(gitignore_parent, exist_ok=True)
+        gitignore_path = os.path.join(tmgit_tree, '.gitignore')
 
         if not os.path.exists(gitignore_path):
             with open(gitignore_path, 'w') as f:
                 f.write('*\n')
 
-        # 3. Verificar e criar/trocar para a branch do dia
+        # 3. Verificar se o repositório tem commits — se vazio, criar commit inicial
+        if not repo.heads:
+            repo.index.commit(":tada: Inicializando repositório tmgit")
+
+        # 4. Verificar e criar/trocar para a branch do dia
         # Obter todas as branches remotas e locais
         existing_branches = [head.name for head in repo.heads]
 
