@@ -167,8 +167,5 @@ Repositórios de referência:
 - Git flow incremental: feature → develop → master
 - Commits com emojis semânticos
 - `[tool.uv] package = false` no pyproject.toml — projeto de scripts, não pacote
-<<<<<<< HEAD
-=======
 - **Metodologia SDD** — especificações DADO/QUANDO/ENTÃO escritas antes do código
 - Testes pytest derivam das especificações e ficam em `tests/`
->>>>>>> ac533e1 (:memo: Adiciona metodologia SDD e especificações ao CONTEXT.md)
