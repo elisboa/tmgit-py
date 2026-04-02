@@ -1,7 +1,7 @@
 # SESSION.md — Resumo de sessão tmgit-py
 
-> Atualizado em: 2026-03-28
-> Próxima sessão: iniciar feature/climb-py
+> Atualizado em: 2026-04-02
+> Próxima sessão: feature/tests ou feature/add-del-file
 
 ---
 
@@ -9,19 +9,32 @@
 
 ### Branches
 ```
-master    ← estável, 4 commits
-develop   ← feature/land-py e feature/preflight-py mergeadas
-feature/climb-py ← próxima a criar
+master    ← v0.1.0 — primeiro MVP funcional ✅
+develop   ← alinhada com master
 ```
 
 ### Arquivos implementados
 | Arquivo | Status | Branch de origem |
 |---|---|---|
-| `land.py` | ✅ Completo, mergeado na develop | feature/land-py |
-| `preflight.py` | ✅ Completo, mergeado na develop | feature/preflight-py |
-| `climb.py` | ✅ Completo, aguarda commit e merge | feature/climb-py |
-| `fly.py` | ✅ Completo, aguarda commit e merge | feature/fly-py |
-| `main.py` | ✅ Completo, aguarda commit e merge | feature/main-py |
+| `land.py` | ✅ Completo | feature/land-py |
+| `preflight.py` | ✅ Completo | feature/preflight-py |
+| `climb.py` | ✅ Completo | feature/climb-py |
+| `fly.py` | ✅ Completo | feature/fly-py |
+| `main.py` | ✅ Completo | feature/main-py |
+
+### MVP validado
+Teste de integração executado com sucesso:
+```bash
+uv run python main.py /tmp/teste-tmgit
+# Saída:
+# Iniciando aterrissagem chamada por fly
+# Encerramento: Fly concluído com sucesso
+# Codigo de erro: 0
+```
+Repositório criado corretamente em `/tmp/teste-tmgit`:
+- `.git` — ponteiro para separate_git_dir
+- `.tmgit/.git` — repositório git real
+- `.gitignore` com `*`
 
 ---
 
