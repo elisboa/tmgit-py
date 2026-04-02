@@ -29,7 +29,7 @@ def climb(context: dict) -> dict:
     try:
         # 1. Verificar se o repositório git já existe
         try:
-            repo = Repo(tmgit_dir)
+            repo = Repo(tmgit_tree)
         except InvalidGitRepositoryError:
             # Repositório não existe — criar com separate_git_dir
             os.makedirs(tmgit_dir, exist_ok=True)
@@ -55,7 +55,6 @@ def climb(context: dict) -> dict:
             repo.heads[branch_name].checkout()
         else:
             # Branch não existe — criar a partir da branch atual
-            current_branch = repo.active_branch.name
             new_branch = repo.create_head(branch_name)
             new_branch.checkout()
 
