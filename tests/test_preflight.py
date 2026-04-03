@@ -129,7 +129,9 @@ class TestPreflightSuccessful:
             'land_errlvl',
             'land_caller',
             'land_msg',
-            'land_errmsg'
+            'land_errmsg',
+            'command',
+            'command_target'
         }
         assert set(context.keys()) == expected_keys
 
