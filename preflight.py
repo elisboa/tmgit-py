@@ -7,7 +7,7 @@ import sys
 import os
 import shutil
 import datetime
-from land import land
+from exceptions import PreflightError
 
 
 def preflight():
@@ -25,8 +25,10 @@ def preflight():
 
     # Verificar se pelo menos um argumento foi passado
     if len(args) < 1:
-        land(1, "preflight", f"Número de parâmetros passados: {len(args)}",
-             "Uso: tmgit.py [diretório a ser versionado]")
+        raise PreflightError(
+            message=f"Número de parâmetros passados: {len(args)}",
+            caller="preflight",
+            error_message="Uso: tmgit.py [diretório a ser versionado]")
 
     tmgit_tree = args[0]
 
@@ -35,25 +37,33 @@ def preflight():
 
     # Verificar se o diretório existe
     if not os.path.exists(tmgit_tree):
-        land(1, "preflight", f"Verificando diretório {tmgit_tree}",
-             "Diretório não existe")
+        raise PreflightError(
+            message=f"Verificando diretório {tmgit_tree}",
+            caller="preflight",
+            error_message="Diretório não existe")
 
     # Verificar se o diretório é acessível (leitura e escrita)
     if not os.access(tmgit_tree, os.R_OK | os.W_OK):
-        land(1, "preflight", f"Verificando acesso ao diretório {tmgit_tree}",
-             "Diretório não acessível")
+        raise PreflightError(
+            message=f"Verificando acesso ao diretório {tmgit_tree}",
+            caller="preflight",
+            error_message="Diretório não acessível")
 
     # Verificar se o binário do git está disponível
     git_path = shutil.which('git')
     if not git_path:
-        land(1, "preflight", "Verificação do executável do git",
-             "Arquivo executável do git não encontrado")
+        raise PreflightError(
+            message="Verificação do executável do git",
+            caller="preflight",
+            error_message="Arquivo executável do git não encontrado")
 
     # Verificar se existe arquivo de lock
     lock_file = os.path.join(tmgit_dir, 'index.lock')
     if os.path.exists(lock_file):
-        land(1, "preflight", "Verificando se o arquivo de lock existe",
-             "Arquivo de lock já existe")
+        raise PreflightError(
+            message="Verificando se o arquivo de lock existe",
+            caller="preflight",
+            error_message="Arquivo de lock já existe")
 
     # Inicializar variáveis de contexto
     # tmgit_dir já foi inicializado acima
@@ -81,13 +91,17 @@ def preflight():
 
         # Validar comando
         if command not in valid_commands:
-            land(1, "preflight", f"Comando inválido: {command}",
-                 "Comandos válidos: add-file, del-file, push-remote")
+            raise PreflightError(
+                message=f"Comando inválido: {command}",
+                caller="preflight",
+                error_message="Comandos válidos: add-file, del-file, push-remote")
 
         # Verificar comando que requer target
         if command in ['add-file', 'del-file'] and len(args) == 2:
-            land(1, "preflight", f"Comando {command} requer arquivo alvo",
-                 "Uso: tmgit.py [diretório] add-file <arquivo> | del-file <arquivo>")
+            raise PreflightError(
+                message=f"Comando {command} requer arquivo alvo",
+                caller="preflight",
+                error_message="Uso: tmgit.py [diretório] add-file <arquivo> | del-file <arquivo>")
 
         command_detected = command
         command_target_detected = target

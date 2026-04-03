@@ -1,7 +1,7 @@
 # SESSION.md — Resumo de sessão tmgit-py
 
 > Atualizado em: 2026-04-03
-> Próxima sessão: feature/add-del-file → tag v0.4.0
+> Próxima sessão: feature/version-command ou uso real no $HOME
 
 ---
 
@@ -15,78 +15,55 @@
 | `v0.2.0` | Suite completa de testes — 45/45 passando |
 | `v0.2.1` | Fix docs — CONTEXT.md substituído por copilot-instructions.md |
 | `v0.3.0` | Fix docs — referência ao modo-aviao@v1.2 (criado no MacBook Air) |
+| `v0.3.1` | Fix docs — corrige referências e histórico de versões |
+| `v0.4.0` | Feature — add-file e del-file implementados |
+| `v0.4.1` | Qualidade — cobertura de testes 100%, 68 testes |
 
-> **Nota:** `v0.3.0` e `v0.2.1` estão fora de ordem semântica no histórico git — o `v0.3.0` foi criado antes do `v0.2.1`. Isso é um aprendizado de git flow: não reescrever tags já publicadas no remoto. A próxima feature real recebe `v0.4.0`.
+> **Nota:** `v0.3.0` e `v0.2.1` estão fora de ordem semântica — aprendizado de git flow: não reescrever tags já publicadas no remoto.
 
 ### Branches
 ```
-master    ← v0.2.1 mais recente no histórico linear
+master    ← v0.4.1 ✅
 develop   ← alinhada com master
 ```
 
 ### Arquivos implementados
-| Arquivo | Status |
-|---|---|
-| `land.py` | ✅ Completo + 10 testes |
-| `preflight.py` | ✅ Completo + 14 testes |
-| `climb.py` | ✅ Completo + 10 testes |
-| `fly.py` | ✅ Completo + 11 testes |
-| `main.py` | ✅ Completo |
-| `tests/test_land.py` | ✅ 10/10 |
-| `tests/test_preflight.py` | ✅ 14/14 |
-| `tests/test_climb.py` | ✅ 10/10 |
-| `tests/test_fly.py` | ✅ 11/11 |
+| Arquivo | Cobertura | Testes |
+|---|---|---|
+| `land.py` | 100% | 10/10 |
+| `preflight.py` | 100% | 20/20 |
+| `climb.py` | 100% | 11/11 |
+| `fly.py` | 100% | 24/24 |
+| `main.py` | 100% | 3/3 |
 
 ### Suite de testes
 ```bash
-uv run pytest tests/ -v
-# 45 passed in 4.45s
+uv run pytest tests/ --cov=. --cov-report=term-missing
+# 68 passed — 100% coverage
 ```
 
 ---
 
 ## Próximas ações imediatas
 
-### 1. Iniciar feature/add-del-file (→ v0.4.0)
+### 1. Uso real no $HOME
 ```bash
-git checkout develop
-git checkout -b feature/add-del-file
+# Inicializar repositório no $HOME
+uv run python ~/git/github/elisboa/tmgit-py/main.py ~
+
+# Rastrear arquivos importantes
+uv run python ~/git/github/elisboa/tmgit-py/main.py ~ add-file .zshrc
+uv run python ~/git/github/elisboa/tmgit-py/main.py ~ add-file .gitconfig
+
+# Rodar via cron (exemplo — a cada hora)
+0 * * * * cd ~/git/github/elisboa/tmgit-py && uv run python main.py ~
 ```
 
-### 2. Escrever especificações SDD antes de codar
-
-As especificações já estão em `.github/copilot-instructions.md` na seção `add_file() e del_file()`. Revisar com o Claude antes de gerar o prompt para o Copilot.
-
-### 3. Implementar add-file e del-file
-
-Mudanças necessárias em dois arquivos:
-
-**`preflight.py`** — detectar argumentos extras:
-```python
-context['command'] = args[1] if len(args) > 1 else None
-context['command_target'] = args[2] if len(args) > 2 else None
-```
-
-**`fly.py`** — implementar e chamar antes do commit:
-```python
-def add_file(repo, filepath): ...
-def del_file(repo, filepath): ...
-```
-
-### 4. Escrever testes para add-file e del-file
-
-Derivar de especificações DADO/QUANDO/ENTÃO já documentadas.
-
-### 5. Merge na develop e master com tag v0.4.0
-
-```bash
-git checkout develop
-git merge feature/add-del-file
-git checkout master
-git merge develop
-git tag -a v0.4.0 -m ":label: Implementa add-file e del-file"
-git push origin master --follow-tags
-```
+### 2. Possíveis próximas features (v0.5.0)
+- `--version` flag para exibir versão atual
+- Modo `version-all` — versionar todos os arquivos do diretório
+- Arquivo de configuração `.tmgit.conf`
+- Suporte a múltiplos diretórios em uma única chamada
 
 ---
 
@@ -99,7 +76,8 @@ cd tmgit-py
 uv sync
 
 # Validar
-uv run pytest tests/ -v
+uv run pytest tests/ --cov=. --cov-report=term-missing
+# Esperado: 68 passed, 100% coverage
 
 # Modelos Ollama
 ollama pull qwen2.5-coder:7b   # aider no terminal
@@ -128,9 +106,9 @@ revisão de código gerado pelo Copilot e atualização do
 .github/copilot-instructions.md. O Copilot Chat no VS Code cuida da
 geração técnica do código.
 
-Estado atual: MVP v0.2.0 funcional com 45 testes passando.
-Documentação unificada em .github/copilot-instructions.md (v0.2.1/v0.3.0).
-Próximo passo: feature/add-del-file → tag v0.4.0.
+Estado atual: v0.4.1 — 68 testes, 100% de cobertura.
+add-file e del-file implementados e validados.
+Próximo passo: uso real no $HOME ou nova feature.
 
 Repositórios de referência:
 - linux-time-machine.sh (original em shell)
@@ -149,10 +127,14 @@ Repositórios de referência:
 - Sempre reutilizar variáveis de caminho já calculadas
 - Documentação unificada em `.github/copilot-instructions.md` — não existe mais `CONTEXT.md`
 - Git flow incremental: feature → develop → master
+- Merge commits com `--no-ff` e emoji `:twisted_rightwards_arrows:`
 - Commits com emojis semânticos
 - `[tool.uv] package = false` no pyproject.toml — projeto de scripts, não pacote
 - **Metodologia SDD** — especificações DADO/QUANDO/ENTÃO escritas antes do código
 - Testes pytest derivam das especificações e ficam em `tests/`
-- **Fluxo sempre completo:** as quatro fases `preflight → climb → fly → land` são sempre executadas em ordem, sem desvio. O `fly()` decide internamente qual operação executar via `context['command']` — nunca desviar o fluxo antes do `fly()`
+- **Fluxo sempre completo:** `preflight → climb → fly → land` — nunca desviar antes do `fly()`
+- O `fly()` decide qual operação executar via `context['command']`
 - **Versionamento:** MAJOR.MINOR.PATCH — MINOR para nova feature, PATCH para fix/doc
-- **Próxima tag:** `v0.4.0` para a feature add-file/del-file
+- `del_file()` verifica rastreamento no index, não existência no disco
+- `if __name__ == "__main__":` excluído da cobertura via `pyproject.toml`
+- Atributos read-only do gitpython testados via `unittest.mock.MagicMock` em vez de `monkeypatch`

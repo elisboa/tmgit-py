@@ -8,6 +8,7 @@ import os
 import shutil
 from datetime import datetime
 from preflight import preflight
+from exceptions import PreflightError, ClimbError, FlyError, TmgitError
 
 
 class TestPreflightErrorConditions:
@@ -21,10 +22,8 @@ class TestPreflightErrorConditions:
         # Simular sys.argv sem argumentos (apenas o nome do script)
         monkeypatch.setattr(sys, 'argv', ['tmgit.py'])
 
-        with pytest.raises(SystemExit) as exc_info:
+        with pytest.raises(PreflightError):
             preflight()
-
-        assert exc_info.value.code == 1
 
     def test_preflight_exits_when_directory_does_not_exist(self, monkeypatch):
         """DADO que o diretório passado não existe
@@ -35,10 +34,8 @@ class TestPreflightErrorConditions:
         nonexistent_dir = '/this/path/definitely/does/not/exist/tmgit-test'
         monkeypatch.setattr(sys, 'argv', ['tmgit.py', nonexistent_dir])
 
-        with pytest.raises(SystemExit) as exc_info:
+        with pytest.raises(PreflightError):
             preflight()
-
-        assert exc_info.value.code == 1
 
     def test_preflight_exits_when_directory_not_writable(self, monkeypatch, tmp_path):
         """DADO que o diretório existe mas não tem permissão de escrita
@@ -53,10 +50,8 @@ class TestPreflightErrorConditions:
         try:
             monkeypatch.setattr(sys, 'argv', ['tmgit.py', str(test_dir)])
 
-            with pytest.raises(SystemExit) as exc_info:
+            with pytest.raises(PreflightError):
                 preflight()
-
-            assert exc_info.value.code == 1
         finally:
             # Restaurar permissões para cleanup
             test_dir.chmod(0o755)
@@ -73,10 +68,8 @@ class TestPreflightErrorConditions:
         monkeypatch.setattr(shutil, 'which', lambda x: None)
         monkeypatch.setattr(sys, 'argv', ['tmgit.py', str(test_dir)])
 
-        with pytest.raises(SystemExit) as exc_info:
+        with pytest.raises(PreflightError):
             preflight()
-
-        assert exc_info.value.code == 1
 
     def test_preflight_exits_when_lock_file_exists(self, monkeypatch, tmp_path):
         """DADO que existe um arquivo index.lock em tmgit_dir
@@ -94,10 +87,8 @@ class TestPreflightErrorConditions:
 
         monkeypatch.setattr(sys, 'argv', ['tmgit.py', str(test_dir)])
 
-        with pytest.raises(SystemExit) as exc_info:
+        with pytest.raises(PreflightError):
             preflight()
-
-        assert exc_info.value.code == 1
 
 
 class TestPreflightSuccessful:
@@ -316,10 +307,8 @@ class TestPreflightCommands:
 
         monkeypatch.setattr(sys, 'argv', ['tmgit.py', str(test_dir), 'version-all'])
 
-        with pytest.raises(SystemExit) as exc_info:
+        with pytest.raises(PreflightError):
             preflight()
-
-        assert exc_info.value.code == 1
 
     def test_preflight_exits_on_add_file_without_target(self, monkeypatch, tmp_path):
         """DADO que 'add-file' é passado sem arquivo alvo (apenas dois argumentos)
@@ -331,10 +320,8 @@ class TestPreflightCommands:
 
         monkeypatch.setattr(sys, 'argv', ['tmgit.py', str(test_dir), 'add-file'])
 
-        with pytest.raises(SystemExit) as exc_info:
+        with pytest.raises(PreflightError):
             preflight()
-
-        assert exc_info.value.code == 1
 
     def test_preflight_exits_on_del_file_without_target(self, monkeypatch, tmp_path):
         """DADO que 'del-file' é passado sem arquivo alvo (apenas dois argumentos)
@@ -346,10 +333,8 @@ class TestPreflightCommands:
 
         monkeypatch.setattr(sys, 'argv', ['tmgit.py', str(test_dir), 'del-file'])
 
-        with pytest.raises(SystemExit) as exc_info:
+        with pytest.raises(PreflightError):
             preflight()
-
-        assert exc_info.value.code == 1
 
     def test_preflight_sets_command_add_file_with_target(self, monkeypatch, tmp_path):
         """DADO que 'add-file' é passado com arquivo alvo
