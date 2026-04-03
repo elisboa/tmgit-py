@@ -11,7 +11,7 @@ Este é um projeto "Build to Learn": o objetivo principal é aprender Python e g
 ---
 
 ## Arquitetura: padrão modo-avião
-
+> Atualização de 2026-04-02: o guia "modo-aviao" foi refinado para ser mais objetivo, mantendo as quatro fases com responsabilidades bem definidas (tag de referência: `modo-aviao@v1.2`).
 Todo o código segue o guia de boas práticas "modo-avião". As quatro fases são obrigatórias e cada uma tem responsabilidade exclusiva:
 
 | Fase | Arquivo | Responsabilidade |

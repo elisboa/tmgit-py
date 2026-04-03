@@ -1,79 +1,64 @@
 # SESSION.md — Resumo de sessão tmgit-py
 
 > Atualizado em: 2026-04-02
-> Próxima sessão: feature/tests ou feature/add-del-file
+> Próxima sessão: feature/add-del-file (v0.3.0)
 
 ---
 
 ## Estado atual do projeto
 
+> Nota: contexto revisto com base na documentação atualizada do guia modo-aviao (2026-04-02), enfatizando as quatro fases e contratos claros preflight, climb, fly, land (tag de referência: `modo-aviao@v1.2`).
+
+### Versões
+- `v0.1.0` — primeiro MVP funcional
+- `v0.2.0` — suite completa de testes (45/45 passando)
+
 ### Branches
 ```
-master    ← v0.1.0 — primeiro MVP funcional ✅
+master    ← v0.2.0 — MVP com testes completos ✅
 develop   ← alinhada com master
 ```
 
 ### Arquivos implementados
-| Arquivo | Status | Branch de origem |
-|---|---|---|
-| `land.py` | ✅ Completo | feature/land-py |
-| `preflight.py` | ✅ Completo | feature/preflight-py |
-| `climb.py` | ✅ Completo | feature/climb-py |
-| `fly.py` | ✅ Completo | feature/fly-py |
-| `main.py` | ✅ Completo | feature/main-py |
+| Arquivo | Status |
+|---|---|
+| `land.py` | ✅ Completo + 10 testes |
+| `preflight.py` | ✅ Completo + 14 testes |
+| `climb.py` | ✅ Completo + 10 testes |
+| `fly.py` | ✅ Completo + 11 testes |
+| `main.py` | ✅ Completo |
+| `tests/test_land.py` | ✅ 10/10 |
+| `tests/test_preflight.py` | ✅ 14/14 |
+| `tests/test_climb.py` | ✅ 10/10 |
+| `tests/test_fly.py` | ✅ 11/11 |
 
-### MVP validado
-Teste de integração executado com sucesso:
+### Suite de testes
 ```bash
-uv run python main.py /tmp/teste-tmgit
-# Saída:
-# Iniciando aterrissagem chamada por fly
-# Encerramento: Fly concluído com sucesso
-# Codigo de erro: 0
+uv run pytest tests/ -v
+# 45 passed in 4.45s
 ```
-Repositório criado corretamente em `/tmp/teste-tmgit`:
-- `.git` — ponteiro para separate_git_dir
-- `.tmgit/.git` — repositório git real
-- `.gitignore` com `*`
 
 ---
 
 ## Próximas ações imediatas
 
-### 1. Commitar e mergear main.py
-```bash
-cp ~/Downloads/SESSION.md ~/git/github/elisboa/tmgit-py/SESSION.md
-git add main.py SESSION.md
-git commit -m ":sparkles: Implementa main.py orquestrando as quatro fases"
-git push origin feature/main-py
-git checkout develop
-git merge feature/main-py
-git push origin develop
-```
-
-### 2. Teste de integração básico
-Após o merge, testar o fluxo completo com um diretório temporário:
-```bash
-mkdir -p /tmp/teste-tmgit
-uv run python main.py /tmp/teste-tmgit
-```
-
-### 3. Merge da develop na master (primeiro MVP)
-Se o teste passar:
-```bash
-git checkout master
-git merge develop
-git tag -a v0.1.0 -m ":label: Primeiro MVP funcional"
-git push origin master --follow-tags
-```
-
-### 4. Criar pasta tests/ e escrever testes pytest
-Derivar testes das especificações DADO/QUANDO/ENTÃO do CONTEXT.md:
+### 1. Iniciar feature/add-del-file (v0.3.0)
 ```bash
 git checkout develop
-git checkout -b feature/tests
-mkdir tests
+git checkout -b feature/add-del-file
 ```
+
+### 2. Escrever especificações SDD no CONTEXT.md antes de codar
+
+### 3. Implementar add-file e del-file
+Mudanças necessárias:
+- `preflight.py` — detectar argumentos extras:
+  `context['command']` e `context['command_target']`
+- `fly.py` — implementar `add_file()` e `del_file()`
+
+### 4. Escrever testes para add-file e del-file
+
+### 5. Merge na develop e master com tag v0.3.0
 
 ### 5. Feature: add-file e del-file (v0.2.0)
 ```bash
