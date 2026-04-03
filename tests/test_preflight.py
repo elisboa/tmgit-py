@@ -301,3 +301,101 @@ class TestPreflightDateFormat:
         # A data deve ser hoje
         assert branch_date.date() >= before.date()
         assert branch_date.date() <= after.date()
+
+
+class TestPreflightCommands:
+    """Testes para detecção de comandos opcionais em preflight()."""
+
+    def test_preflight_exits_on_invalid_command(self, monkeypatch, tmp_path):
+        """DADO que um comando inválido é passado (ex: 'version-all')
+        QUANDO preflight() for chamado
+        ENTÃO deve encerrar com sys.exit(1)
+        """
+        test_dir = tmp_path / "invalid_command"
+        test_dir.mkdir()
+
+        monkeypatch.setattr(sys, 'argv', ['tmgit.py', str(test_dir), 'version-all'])
+
+        with pytest.raises(SystemExit) as exc_info:
+            preflight()
+
+        assert exc_info.value.code == 1
+
+    def test_preflight_exits_on_add_file_without_target(self, monkeypatch, tmp_path):
+        """DADO que 'add-file' é passado sem arquivo alvo (apenas dois argumentos)
+        QUANDO preflight() for chamado
+        ENTÃO deve encerrar com sys.exit(1)
+        """
+        test_dir = tmp_path / "add_file_no_target"
+        test_dir.mkdir()
+
+        monkeypatch.setattr(sys, 'argv', ['tmgit.py', str(test_dir), 'add-file'])
+
+        with pytest.raises(SystemExit) as exc_info:
+            preflight()
+
+        assert exc_info.value.code == 1
+
+    def test_preflight_exits_on_del_file_without_target(self, monkeypatch, tmp_path):
+        """DADO que 'del-file' é passado sem arquivo alvo (apenas dois argumentos)
+        QUANDO preflight() for chamado
+        ENTÃO deve encerrar com sys.exit(1)
+        """
+        test_dir = tmp_path / "del_file_no_target"
+        test_dir.mkdir()
+
+        monkeypatch.setattr(sys, 'argv', ['tmgit.py', str(test_dir), 'del-file'])
+
+        with pytest.raises(SystemExit) as exc_info:
+            preflight()
+
+        assert exc_info.value.code == 1
+
+    def test_preflight_sets_command_add_file_with_target(self, monkeypatch, tmp_path):
+        """DADO que 'add-file' é passado com arquivo alvo
+        QUANDO preflight() for chamado
+        ENTÃO context['command'] deve ser 'add-file'
+        E context['command_target'] deve ser o arquivo passado
+        """
+        test_dir = tmp_path / "add_file_with_target"
+        test_dir.mkdir()
+        target_file = "example.txt"
+
+        monkeypatch.setattr(sys, 'argv', ['tmgit.py', str(test_dir), 'add-file', target_file])
+
+        context = preflight()
+
+        assert context['command'] == 'add-file'
+        assert context['command_target'] == target_file
+
+    def test_preflight_sets_command_push_remote_without_target(self, monkeypatch, tmp_path):
+        """DADO que 'push-remote' é passado (sem arquivo alvo)
+        QUANDO preflight() for chamado
+        ENTÃO context['command'] deve ser 'push-remote'
+        E context['command_target'] deve ser None
+        """
+        test_dir = tmp_path / "push_remote"
+        test_dir.mkdir()
+
+        monkeypatch.setattr(sys, 'argv', ['tmgit.py', str(test_dir), 'push-remote'])
+
+        context = preflight()
+
+        assert context['command'] == 'push-remote'
+        assert context['command_target'] is None
+
+    def test_preflight_sets_command_none_when_no_command(self, monkeypatch, tmp_path):
+        """DADO que nenhum comando é passado
+        QUANDO preflight() for chamado
+        ENTÃO context['command'] deve ser None
+        E context['command_target'] deve ser None
+        """
+        test_dir = tmp_path / "no_command"
+        test_dir.mkdir()
+
+        monkeypatch.setattr(sys, 'argv', ['tmgit.py', str(test_dir)])
+
+        context = preflight()
+
+        assert context['command'] is None
+        assert context['command_target'] is None
