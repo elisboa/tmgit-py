@@ -7,6 +7,8 @@
 
 ## Estado atual do projeto
 
+> Nota: contexto revisto com base na documentação atualizada do guia modo-aviao (2026-04-02), enfatizando as quatro fases e contratos claros preflight, climb, fly, land (tag de referência: `modo-aviao@v1.2`).
+
 ### Versões
 - `v0.1.0` — primeiro MVP funcional
 - `v0.2.0` — suite completa de testes (45/45 passando)
