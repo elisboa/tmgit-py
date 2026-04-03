@@ -25,6 +25,18 @@ Todo o código segue o guia de boas práticas "modo-avião". As quatro fases sã
 
 **Regra fundamental:** nenhuma lógica de negócio fora da fase `fly`. Nenhum encerramento fora da fase `land`.
 
+**Regra de fluxo obrigatória:** as quatro fases são sempre executadas em ordem, sem exceção. Nunca desviar o fluxo antes do `fly()`. O `fly()` decide internamente qual operação executar com base no contexto:
+
+```
+Sempre: preflight() → climb() → fly() → land()
+```
+
+O `fly()` lê `context['command']` e decide:
+- `None` → fluxo normal: commit + tag
+- `'add-file'` → adiciona arquivo ao rastreamento
+- `'del-file'` → remove arquivo do rastreamento
+- `'push-remote'` → push para remotos
+
 ---
 
 ## Estrutura de arquivos
