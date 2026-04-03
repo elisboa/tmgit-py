@@ -1,7 +1,7 @@
 # SESSION.md — Resumo de sessão tmgit-py
 
 > Atualizado em: 2026-04-03
-> Próxima sessão: feature/tests-preflight-commands ou feature/integration-test
+> Próxima sessão: feature/version-command ou uso real no $HOME
 
 ---
 
@@ -17,72 +17,53 @@
 | `v0.3.0` | Fix docs — referência ao modo-aviao@v1.2 (criado no MacBook Air) |
 | `v0.3.1` | Fix docs — corrige referências e histórico de versões |
 | `v0.4.0` | Feature — add-file e del-file implementados |
+| `v0.4.1` | Qualidade — cobertura de testes 100%, 68 testes |
 
 > **Nota:** `v0.3.0` e `v0.2.1` estão fora de ordem semântica — aprendizado de git flow: não reescrever tags já publicadas no remoto.
 
 ### Branches
 ```
-master    ← v0.4.0 ✅
+master    ← v0.4.1 ✅
 develop   ← alinhada com master
 ```
 
 ### Arquivos implementados
-| Arquivo | Status |
-|---|---|
-| `land.py` | ✅ Completo + 10 testes |
-| `preflight.py` | ✅ Completo + detecção de comandos + 14 testes |
-| `climb.py` | ✅ Completo + 10 testes |
-| `fly.py` | ✅ Completo + add_file/del_file + 17 testes |
-| `main.py` | ✅ Completo |
-| `tests/test_land.py` | ✅ 10/10 |
-| `tests/test_preflight.py` | ✅ 14/14 |
-| `tests/test_climb.py` | ✅ 10/10 |
-| `tests/test_fly.py` | ✅ 17/17 |
+| Arquivo | Cobertura | Testes |
+|---|---|---|
+| `land.py` | 100% | 10/10 |
+| `preflight.py` | 100% | 20/20 |
+| `climb.py` | 100% | 11/11 |
+| `fly.py` | 100% | 24/24 |
+| `main.py` | 100% | 3/3 |
 
 ### Suite de testes
 ```bash
-uv run pytest tests/ -v
-# 51 passed in 7.07s
+uv run pytest tests/ --cov=. --cov-report=term-missing
+# 68 passed — 100% coverage
 ```
 
 ---
 
 ## Próximas ações imediatas
 
-### 1. Testes de integração end-to-end (opcional mas recomendado)
-Testar o fluxo completo com add-file e del-file via linha de comando:
+### 1. Uso real no $HOME
 ```bash
-mkdir -p /tmp/teste-tmgit
-uv run python main.py /tmp/teste-tmgit add-file ~/.zshrc
-uv run python main.py /tmp/teste-tmgit del-file .zshrc
+# Inicializar repositório no $HOME
+uv run python ~/git/github/elisboa/tmgit-py/main.py ~
+
+# Rastrear arquivos importantes
+uv run python ~/git/github/elisboa/tmgit-py/main.py ~ add-file .zshrc
+uv run python ~/git/github/elisboa/tmgit-py/main.py ~ add-file .gitconfig
+
+# Rodar via cron (exemplo — a cada hora)
+0 * * * * cd ~/git/github/elisboa/tmgit-py && uv run python main.py ~
 ```
 
-### 2. Testes adicionais no test_preflight.py para comandos (v0.4.1)
-```bash
-git checkout develop
-git checkout -b feature/tests-preflight-commands
-```
-
-Especificações a cobrir:
-```
-DADO que add-file é passado sem arquivo alvo
-QUANDO preflight() for chamado
-ENTÃO deve encerrar com sys.exit(1)
-
-DADO que um comando inválido é passado
-QUANDO preflight() for chamado
-ENTÃO deve encerrar com sys.exit(1)
-
-DADO que add-file é passado com arquivo alvo
-QUANDO preflight() for chamado
-ENTÃO context['command'] deve ser 'add-file' e context['command_target'] o arquivo
-```
-
-### 3. Próxima feature maior (v0.5.0)
-A definir — possíveis candidatos:
-- Suporte a `push-remote` com configuração de remotos
-- Modo `version-all` (versionar todos os arquivos do diretório)
+### 2. Possíveis próximas features (v0.5.0)
+- `--version` flag para exibir versão atual
+- Modo `version-all` — versionar todos os arquivos do diretório
 - Arquivo de configuração `.tmgit.conf`
+- Suporte a múltiplos diretórios em uma única chamada
 
 ---
 
@@ -95,7 +76,8 @@ cd tmgit-py
 uv sync
 
 # Validar
-uv run pytest tests/ -v
+uv run pytest tests/ --cov=. --cov-report=term-missing
+# Esperado: 68 passed, 100% coverage
 
 # Modelos Ollama
 ollama pull qwen2.5-coder:7b   # aider no terminal
@@ -124,8 +106,9 @@ revisão de código gerado pelo Copilot e atualização do
 .github/copilot-instructions.md. O Copilot Chat no VS Code cuida da
 geração técnica do código.
 
-Estado atual: v0.4.0 — add-file e del-file implementados, 51 testes passando.
-Próximo passo: testes adicionais no preflight para comandos, ou nova feature.
+Estado atual: v0.4.1 — 68 testes, 100% de cobertura.
+add-file e del-file implementados e validados.
+Próximo passo: uso real no $HOME ou nova feature.
 
 Repositórios de referência:
 - linux-time-machine.sh (original em shell)
@@ -153,3 +136,5 @@ Repositórios de referência:
 - O `fly()` decide qual operação executar via `context['command']`
 - **Versionamento:** MAJOR.MINOR.PATCH — MINOR para nova feature, PATCH para fix/doc
 - `del_file()` verifica rastreamento no index, não existência no disco
+- `if __name__ == "__main__":` excluído da cobertura via `pyproject.toml`
+- Atributos read-only do gitpython testados via `unittest.mock.MagicMock` em vez de `monkeypatch`
