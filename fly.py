@@ -5,7 +5,7 @@ Este módulo contém a lógica principal: commit, tag, push.
 import os
 from git import Repo
 from git.exc import GitCommandError
-from land import land
+from exceptions import FlyError
 
 
 def commit_files(repo, commit_date: str) -> bool:
@@ -163,5 +163,7 @@ def fly(context: dict) -> dict:
         return context
 
     except Exception as e:
-        land(1, 'fly', f'Erro ao executar voo em {tmgit_tree}',
-             f'Detalhes: {str(e)}')
+        raise FlyError(
+            message=f"Erro ao executar voo em {tmgit_tree}",
+            caller="fly",
+            error_message=f"Detalhes: {str(e)}")
