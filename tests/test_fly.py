@@ -6,8 +6,10 @@ import pytest
 import os
 from datetime import datetime
 from git import Repo
+from git.exc import GitCommandError
+from unittest.mock import patch, MagicMock
 from climb import climb
-from fly import fly
+from fly import fly, commit_files, tag_commit, push_remote
 
 
 def make_context(tmp_path):
@@ -341,6 +343,50 @@ class TestFlyCommands:
 
         assert result_context['land_errlvl'] == 0
 
+    def test_fly_add_file_absolute_path(self, tmp_path):
+        """DADO que add-file é passado com caminho absoluto válido
+        QUANDO fly() for chamado
+        ENTÃO o arquivo deve estar rastreado no index
+        """
+        context = make_context(tmp_path)
+        test_file = os.path.join(context['tmgit_tree'], 'absolute.txt')
+        with open(test_file, 'w') as f:
+            f.write('conteudo absoluto')
+
+        context = climb(context)
+        context['command'] = 'add-file'
+        context['command_target'] = test_file  # caminho absoluto
+
+        result_context = fly(context)
+
+        repo = Repo(context['tmgit_tree'])
+        assert 'absolute.txt' in [path for path, _ in repo.index.entries.keys()]
+        assert result_context['land_errlvl'] == 0
+
+    def test_fly_del_file_absolute_path(self, tmp_path):
+        """DADO que del-file é passado com caminho absoluto de arquivo rastreado
+        QUANDO fly() for chamado
+        ENTÃO o arquivo não deve mais estar no index
+        """
+        context = make_context(tmp_path)
+        context = climb(context)
+        repo = Repo(context['tmgit_tree'])
+
+        test_file = os.path.join(context['tmgit_tree'], 'tracked_abs.txt')
+        with open(test_file, 'w') as f:
+            f.write('content')
+        repo.index.add(['tracked_abs.txt'])
+        repo.index.commit('track file abs')
+
+        context['command'] = 'del-file'
+        context['command_target'] = test_file  # caminho absoluto
+
+        result_context = fly(context)
+
+        repo = Repo(context['tmgit_tree'])
+        assert 'tracked_abs.txt' not in [path for path, _ in repo.index.entries.keys()]
+        assert result_context['land_errlvl'] == 0
+
 
 class TestFlyContext:
     """Testes para o dicionário de contexto retornado por fly()."""
@@ -502,3 +548,77 @@ class TestFlyCompleteFlow:
 
         # Verificar que o arquivo não-rastreado não está no commit
         assert 'untracked' not in last_commit.message or 'tracked.txt' in last_commit.message
+
+
+class TestFlyErrorPaths:
+    """Testes para caminhos de erro em funções auxiliares do fly()."""
+
+    def test_commit_files_raises_exception_on_git_error(self, tmp_path):
+        """DADO que repo.index.commit() lança GitCommandError
+        QUANDO commit_files() for chamado
+        ENTÃO deve lançar Exception com mensagem contendo "Erro ao commitar"
+        """
+        with patch('fly.Repo') as mock_repo_class:
+            mock_repo = MagicMock()
+            mock_repo_class.return_value = mock_repo
+            mock_repo.is_dirty.return_value = True
+            mock_repo.index.entries.keys.return_value = [('test.txt', 0)]
+            mock_repo.index.add = MagicMock()
+            mock_repo.index.commit.side_effect = GitCommandError('git commit', 1, b'erro', b'')
+            with pytest.raises(Exception) as exc_info:
+                commit_files(mock_repo, '2024.01.01-12.00.00.000')
+            assert "Erro ao commitar" in str(exc_info.value)
+
+    def test_tag_commit_raises_exception_on_git_error(self, tmp_path):
+        """DADO que repo.create_tag() lança GitCommandError
+        QUANDO tag_commit() for chamado
+        ENTÃO deve lançar Exception com mensagem contendo "Erro ao criar tag"
+        """
+        mock_repo = MagicMock()
+        mock_repo.create_tag.side_effect = GitCommandError('git tag', 1, b'erro', b'')
+        with pytest.raises(Exception) as exc_info:
+            tag_commit(mock_repo, '2024.01.01-12.00.00.000')
+        assert "Erro ao criar tag" in str(exc_info.value)
+
+    def test_push_remote_raises_exception_on_git_error(self, tmp_path):
+        """DADO que remote.push() lança GitCommandError
+        QUANDO push_remote() for chamado com remotos configurados
+        ENTÃO deve lançar Exception com mensagem contendo "Erro ao fazer push"
+        """
+        mock_repo = MagicMock()
+        mock_remote = MagicMock()
+        mock_remote.push.side_effect = GitCommandError('git push', 1, b'erro', b'')
+        mock_repo.remotes = [mock_remote]
+        with pytest.raises(Exception) as exc_info:
+            push_remote(mock_repo)
+        assert "Erro ao fazer push" in str(exc_info.value)
+
+    def test_fly_add_file_none_target_raises_systemexit(self, tmp_path):
+        """DADO que command='add-file' e command_target é None
+        QUANDO fly() for chamado
+        ENTÃO deve encerrar com sys.exit(1)
+        """
+        context = make_context(tmp_path)
+        context = climb(context)
+        context['command'] = 'add-file'
+        context['command_target'] = None
+
+        with pytest.raises(SystemExit) as exc_info:
+            fly(context)
+
+        assert exc_info.value.code == 1
+
+    def test_fly_del_file_none_target_raises_systemexit(self, tmp_path):
+        """DADO que command='del-file' e command_target é None
+        QUANDO fly() for chamado
+        ENTÃO deve encerrar com sys.exit(1)
+        """
+        context = make_context(tmp_path)
+        context = climb(context)
+        context['command'] = 'del-file'
+        context['command_target'] = None
+
+        with pytest.raises(SystemExit) as exc_info:
+            fly(context)
+
+        assert exc_info.value.code == 1

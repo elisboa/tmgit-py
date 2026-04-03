@@ -6,6 +6,7 @@ import pytest
 import os
 from datetime import datetime
 from git import Repo
+from unittest.mock import patch
 from climb import climb
 
 
@@ -256,3 +257,20 @@ class TestClimbCompleteFlow:
         assert os.path.exists(test_file)
         with open(test_file, 'r') as f:
             assert f.read() == 'test content'
+
+
+class TestClimbErrorHandling:
+    """Testes para tratamento de erros em climb()."""
+
+    def test_climb_handles_unexpected_error(self, tmp_path):
+        """DADO que ocorre um erro inesperado durante climb()
+        QUANDO climb() for chamado com tmgit_dir inválido que causa exceção
+        ENTÃO deve encerrar com sys.exit(1)
+        """
+        context = make_context(tmp_path)
+
+        with patch('climb.Repo') as mock_repo:
+            mock_repo.side_effect = Exception('erro simulado')
+            with pytest.raises(SystemExit) as exc_info:
+                climb(context)
+            assert exc_info.value.code == 1
