@@ -112,7 +112,6 @@ def fly(context: dict) -> dict:
 
     tmgit_tree = context['tmgit_tree']
     commit_date = context['commit_date']
-    push_remote_requested = context.get('push_remote_requested', False)
     command = context.get('command')
     command_target = context.get('command_target')
 
@@ -153,8 +152,6 @@ def fly(context: dict) -> dict:
         if commit_done:
             tag_commit(repo, commit_date)
 
-        if push_remote_requested:
-            push_remote(repo)
 
         context['land_caller'] = 'fly'
         context['land_msg'] = 'Fly concluído com sucesso'

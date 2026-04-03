@@ -35,7 +35,6 @@ def make_context(tmp_path):
         'land_errmsg': '',
         'command': None,
         'command_target': None,
-        'push_remote_requested': False
     }
 
 
@@ -211,11 +210,11 @@ class TestFlyPush:
 
     def test_fly_handles_no_remotes_configured(self, tmp_path):
         """DADO que não há remotos configurados
-        QUANDO fly() for chamado com push_remote_requested=True
+        QUANDO fly() for chamado com command='push-remote'
         ENTÃO deve retornar contexto com land_errlvl=0 sem erro
         """
         context = make_context(tmp_path)
-        context['push_remote_requested'] = True
+        context['command'] = 'push-remote'
 
         # Preparar repositório via climb
         context = climb(context)
