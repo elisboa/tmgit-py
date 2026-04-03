@@ -343,6 +343,50 @@ class TestFlyCommands:
 
         assert result_context['land_errlvl'] == 0
 
+    def test_fly_add_file_absolute_path(self, tmp_path):
+        """DADO que add-file é passado com caminho absoluto válido
+        QUANDO fly() for chamado
+        ENTÃO o arquivo deve estar rastreado no index
+        """
+        context = make_context(tmp_path)
+        test_file = os.path.join(context['tmgit_tree'], 'absolute.txt')
+        with open(test_file, 'w') as f:
+            f.write('conteudo absoluto')
+
+        context = climb(context)
+        context['command'] = 'add-file'
+        context['command_target'] = test_file  # caminho absoluto
+
+        result_context = fly(context)
+
+        repo = Repo(context['tmgit_tree'])
+        assert 'absolute.txt' in [path for path, _ in repo.index.entries.keys()]
+        assert result_context['land_errlvl'] == 0
+
+    def test_fly_del_file_absolute_path(self, tmp_path):
+        """DADO que del-file é passado com caminho absoluto de arquivo rastreado
+        QUANDO fly() for chamado
+        ENTÃO o arquivo não deve mais estar no index
+        """
+        context = make_context(tmp_path)
+        context = climb(context)
+        repo = Repo(context['tmgit_tree'])
+
+        test_file = os.path.join(context['tmgit_tree'], 'tracked_abs.txt')
+        with open(test_file, 'w') as f:
+            f.write('content')
+        repo.index.add(['tracked_abs.txt'])
+        repo.index.commit('track file abs')
+
+        context['command'] = 'del-file'
+        context['command_target'] = test_file  # caminho absoluto
+
+        result_context = fly(context)
+
+        repo = Repo(context['tmgit_tree'])
+        assert 'tracked_abs.txt' not in [path for path, _ in repo.index.entries.keys()]
+        assert result_context['land_errlvl'] == 0
+
 
 class TestFlyContext:
     """Testes para o dicionário de contexto retornado por fly()."""
@@ -548,3 +592,33 @@ class TestFlyErrorPaths:
         with pytest.raises(Exception) as exc_info:
             push_remote(mock_repo)
         assert "Erro ao fazer push" in str(exc_info.value)
+
+    def test_fly_add_file_none_target_raises_systemexit(self, tmp_path):
+        """DADO que command='add-file' e command_target é None
+        QUANDO fly() for chamado
+        ENTÃO deve encerrar com sys.exit(1)
+        """
+        context = make_context(tmp_path)
+        context = climb(context)
+        context['command'] = 'add-file'
+        context['command_target'] = None
+
+        with pytest.raises(SystemExit) as exc_info:
+            fly(context)
+
+        assert exc_info.value.code == 1
+
+    def test_fly_del_file_none_target_raises_systemexit(self, tmp_path):
+        """DADO que command='del-file' e command_target é None
+        QUANDO fly() for chamado
+        ENTÃO deve encerrar com sys.exit(1)
+        """
+        context = make_context(tmp_path)
+        context = climb(context)
+        context['command'] = 'del-file'
+        context['command_target'] = None
+
+        with pytest.raises(SystemExit) as exc_info:
+            fly(context)
+
+        assert exc_info.value.code == 1
