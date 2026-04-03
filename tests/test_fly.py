@@ -10,6 +10,7 @@ from git.exc import GitCommandError
 from unittest.mock import patch, MagicMock
 from climb import climb
 from fly import fly, commit_files, tag_commit, push_remote
+from exceptions import PreflightError, ClimbError, FlyError, TmgitError
 
 
 def make_context(tmp_path):
@@ -254,7 +255,7 @@ class TestFlyCommands:
         assert 'new.txt' in [path for path, _ in repo.index.entries.keys()]
         assert result_context['land_errlvl'] == 0
 
-    def test_fly_add_file_missing_raises_systemexit(self, tmp_path):
+    def test_fly_add_file_missing_raises_flyerror(self, tmp_path):
         """DADO command='add-file' e arquivo inexistente
         QUANDO fly() for chamado
         ENTÃO deve encerrar com sys.exit(1)
@@ -264,10 +265,8 @@ class TestFlyCommands:
         context['command'] = 'add-file'
         context['command_target'] = 'missing.txt'
 
-        with pytest.raises(SystemExit) as exc_info:
+        with pytest.raises(FlyError):
             fly(context)
-
-        assert exc_info.value.code == 1
 
     def test_fly_add_file_relative_path(self, tmp_path):
         """DADO command='add-file' e command_target relativo
@@ -314,7 +313,7 @@ class TestFlyCommands:
         assert 'tracked.txt' not in [path for path, _ in repo.index.entries.keys()]
         assert result_context['land_errlvl'] == 0
 
-    def test_fly_del_file_not_tracked_raises_systemexit(self, tmp_path):
+    def test_fly_del_file_not_tracked_raises_flyerror(self, tmp_path):
         """DADO command='del-file' e arquivo não rastreado
         QUANDO fly() for chamado
         ENTÃO deve encerrar com sys.exit(1)
@@ -324,10 +323,8 @@ class TestFlyCommands:
         context['command'] = 'del-file'
         context['command_target'] = 'nottracked.txt'
 
-        with pytest.raises(SystemExit) as exc_info:
+        with pytest.raises(FlyError):
             fly(context)
-
-        assert exc_info.value.code == 1
 
     def test_fly_push_remote_no_remotes(self, tmp_path):
         """DADO command='push-remote' e sem remotos
@@ -593,7 +590,7 @@ class TestFlyErrorPaths:
             push_remote(mock_repo)
         assert "Erro ao fazer push" in str(exc_info.value)
 
-    def test_fly_add_file_none_target_raises_systemexit(self, tmp_path):
+    def test_fly_add_file_none_target_raises_flyerror(self, tmp_path):
         """DADO que command='add-file' e command_target é None
         QUANDO fly() for chamado
         ENTÃO deve encerrar com sys.exit(1)
@@ -603,12 +600,10 @@ class TestFlyErrorPaths:
         context['command'] = 'add-file'
         context['command_target'] = None
 
-        with pytest.raises(SystemExit) as exc_info:
+        with pytest.raises(FlyError):
             fly(context)
 
-        assert exc_info.value.code == 1
-
-    def test_fly_del_file_none_target_raises_systemexit(self, tmp_path):
+    def test_fly_del_file_none_target_raises_flyerror(self, tmp_path):
         """DADO que command='del-file' e command_target é None
         QUANDO fly() for chamado
         ENTÃO deve encerrar com sys.exit(1)
@@ -618,7 +613,5 @@ class TestFlyErrorPaths:
         context['command'] = 'del-file'
         context['command_target'] = None
 
-        with pytest.raises(SystemExit) as exc_info:
+        with pytest.raises(FlyError):
             fly(context)
-
-        assert exc_info.value.code == 1
