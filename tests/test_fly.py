@@ -543,8 +543,8 @@ class TestFlyCompleteFlow:
         # Obter o último commit
         last_commit = list(repo.iter_commits())[0]
 
-        # Verificar que o arquivo não-rastreado não está no commit
-        assert 'untracked' not in last_commit.message or 'tracked.txt' in last_commit.message
+        # Verificar que o arquivo não-rastreado não está nos arquivos do commit
+        assert 'untracked.txt' not in last_commit.stats.files
 
 
 class TestFlyErrorPaths:
