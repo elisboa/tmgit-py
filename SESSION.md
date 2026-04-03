@@ -1,21 +1,26 @@
 # SESSION.md — Resumo de sessão tmgit-py
 
-> Atualizado em: 2026-04-02
-> Próxima sessão: feature/add-del-file (v0.3.0)
+> Atualizado em: 2026-04-03
+> Próxima sessão: feature/add-del-file → tag v0.4.0
 
 ---
 
 ## Estado atual do projeto
 
-> Nota: contexto revisto com base na documentação atualizada do guia modo-aviao (2026-04-02), enfatizando as quatro fases e contratos claros preflight, climb, fly, land (tag de referência: `modo-aviao@v1.2`).
+### Histórico de versões
 
-### Versões
-- `v0.1.0` — primeiro MVP funcional
-- `v0.2.0` — suite completa de testes (45/45 passando)
+| Tag | O que representa |
+|---|---|
+| `v0.1.0` | Primeiro MVP funcional — quatro fases implementadas |
+| `v0.2.0` | Suite completa de testes — 45/45 passando |
+| `v0.2.1` | Fix docs — CONTEXT.md substituído por copilot-instructions.md |
+| `v0.3.0` | Fix docs — referência ao modo-aviao@v1.2 (criado no MacBook Air) |
+
+> **Nota:** `v0.3.0` e `v0.2.1` estão fora de ordem semântica no histórico git — o `v0.3.0` foi criado antes do `v0.2.1`. Isso é um aprendizado de git flow: não reescrever tags já publicadas no remoto. A próxima feature real recebe `v0.4.0`.
 
 ### Branches
 ```
-master    ← v0.2.0 — MVP com testes completos ✅
+master    ← v0.2.1 mais recente no histórico linear
 develop   ← alinhada com master
 ```
 
@@ -42,63 +47,68 @@ uv run pytest tests/ -v
 
 ## Próximas ações imediatas
 
-### 1. Iniciar feature/add-del-file (v0.3.0)
+### 1. Iniciar feature/add-del-file (→ v0.4.0)
 ```bash
 git checkout develop
 git checkout -b feature/add-del-file
 ```
 
-### 2. Escrever especificações SDD no .github/copilot-instructions.md antes de codar
+### 2. Escrever especificações SDD antes de codar
+
+As especificações já estão em `.github/copilot-instructions.md` na seção `add_file() e del_file()`. Revisar com o Claude antes de gerar o prompt para o Copilot.
 
 ### 3. Implementar add-file e del-file
-Mudanças necessárias:
-- `preflight.py` — detectar argumentos extras:
-  `context['command']` e `context['command_target']`
-- `fly.py` — implementar `add_file()` e `del_file()`
+
+Mudanças necessárias em dois arquivos:
+
+**`preflight.py`** — detectar argumentos extras:
+```python
+context['command'] = args[1] if len(args) > 1 else None
+context['command_target'] = args[2] if len(args) > 2 else None
+```
+
+**`fly.py`** — implementar e chamar antes do commit:
+```python
+def add_file(repo, filepath): ...
+def del_file(repo, filepath): ...
+```
 
 ### 4. Escrever testes para add-file e del-file
 
-### 5. Merge na develop e master com tag v0.3.0
+Derivar de especificações DADO/QUANDO/ENTÃO já documentadas.
 
-### 5. Feature: add-file e del-file (v0.2.0)
+### 5. Merge na develop e master com tag v0.4.0
+
 ```bash
 git checkout develop
-git checkout -b feature/add-del-file
+git merge feature/add-del-file
+git checkout master
+git merge develop
+git tag -a v0.4.0 -m ":label: Implementa add-file e del-file"
+git push origin master --follow-tags
 ```
-
-Implementar suporte aos comandos opcionais:
-- `main.py /diretorio add-file /caminho/arquivo`
-- `main.py /diretorio del-file /caminho/arquivo`
-
-Mudanças necessárias:
-- `preflight.py` — detectar argumentos extras e adicionar ao contexto:
-  `context['command']` e `context['command_target']`
-- `fly.py` — implementar `add_file()` e `del_file()` e executar
-  antes do commit quando comando estiver no contexto
-
-Especificações SDD a escrever no .github/copilot-instructions.md antes de codar.
 
 ---
 
 ## Setup do ambiente (caso precise reconfigurar)
 
 ```bash
-# Modelos Ollama disponíveis
-ollama list
-# qwen2.5-coder:7b  → aider no terminal
-# qwen2.5-coder:3b  → Continue.dev chat
-# opencoder:1.5b    → Continue.dev autocomplete
-
-# Iniciar aider na pasta do projeto
-cd ~/git/github/elisboa/tmgit-py
-aider
-
-# Ativar ambiente virtual
-source .venv/bin/activate
-
-# Validar dependências
+# Clonar e instalar
+git clone https://github.com/elisboa/tmgit-py
+cd tmgit-py
 uv sync
-uv run python -c "import git; print(git.__version__)"
+
+# Validar
+uv run pytest tests/ -v
+
+# Modelos Ollama
+ollama pull qwen2.5-coder:7b   # aider no terminal
+ollama pull qwen2.5-coder:3b   # Continue.dev chat
+ollama pull opencoder:1.5b     # Continue.dev autocomplete
+
+# Iniciar aider com contexto do projeto
+cd ~/git/github/elisboa/tmgit-py
+aider .github/copilot-instructions.md SESSION.md
 ```
 
 ---
@@ -114,17 +124,18 @@ do tempo). O projeto segue o padrão arquitetural "modo-avião" com quatro
 fases: preflight, climb, fly e land.
 
 Você está atuando como Project Manager — decisões de arquitetura,
-revisão de código gerado pelo Copilot e atualização do .github/copilot-instructions.md.
-O Copilot Chat no VS Code cuida da geração técnica do código.
+revisão de código gerado pelo Copilot e atualização do
+.github/copilot-instructions.md. O Copilot Chat no VS Code cuida da
+geração técnica do código.
 
-Estado atual: land.py completo e mergeado na develop. preflight.py
-gerado mas com um ajuste pendente (ver SESSION.md no projeto).
-Próximo passo: ajustar preflight.py, mergear na develop e iniciar climb.py.
+Estado atual: MVP v0.2.0 funcional com 45 testes passando.
+Documentação unificada em .github/copilot-instructions.md (v0.2.1/v0.3.0).
+Próximo passo: feature/add-del-file → tag v0.4.0.
 
 Repositórios de referência:
 - linux-time-machine.sh (original em shell)
 - tmgit (reescrita em shell com padrão modo-avião)
-- modo-aviao (guia de boas práticas)
+- modo-aviao (guia de boas práticas, tag modo-aviao@v1.2)
 - tmgit-py (projeto ativo em Python)
 ```
 
@@ -136,9 +147,11 @@ Repositórios de referência:
 - Funções principais nomeadas igual à fase: `land()`, `preflight()`, `climb()`, `fly()`
 - Contexto passado entre fases via dicionário Python
 - Sempre reutilizar variáveis de caminho já calculadas
-- `copilot-instructions.md` é hardlink do `.github/copilot-instructions.md` — editar apenas o `.github/copilot-instructions.md`
+- Documentação unificada em `.github/copilot-instructions.md` — não existe mais `CONTEXT.md`
 - Git flow incremental: feature → develop → master
 - Commits com emojis semânticos
 - `[tool.uv] package = false` no pyproject.toml — projeto de scripts, não pacote
 - **Metodologia SDD** — especificações DADO/QUANDO/ENTÃO escritas antes do código
 - Testes pytest derivam das especificações e ficam em `tests/`
+- **Versionamento:** MAJOR.MINOR.PATCH — MINOR para nova feature, PATCH para fix/doc
+- **Próxima tag:** `v0.4.0` para a feature add-file/del-file

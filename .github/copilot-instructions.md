@@ -1,4 +1,4 @@
-# CONTEXT.md — tmgit-py
+# .github/copilot-instructions.md — tmgit-py
 
 ## O que é este projeto
 
@@ -11,7 +11,9 @@ Este é um projeto "Build to Learn": o objetivo principal é aprender Python e g
 ---
 
 ## Arquitetura: padrão modo-avião
+
 > Atualização de 2026-04-02: o guia "modo-aviao" foi refinado para ser mais objetivo, mantendo as quatro fases com responsabilidades bem definidas (tag de referência: `modo-aviao@v1.2`).
+
 Todo o código segue o guia de boas práticas "modo-avião". As quatro fases são obrigatórias e cada uma tem responsabilidade exclusiva:
 
 | Fase | Arquivo | Responsabilidade |
@@ -29,12 +31,14 @@ Todo o código segue o guia de boas práticas "modo-avião". As quatro fases sã
 
 ```
 tmgit-py/
-├── tmgit.py          # entry point — importa e orquestra as quatro fases
+├── main.py           # entry point — importa e orquestra as quatro fases
 ├── preflight.py      # fase 1: validações e variáveis
 ├── climb.py          # fase 2: prepara repositório
 ├── fly.py            # fase 3: commit, tag, push
 ├── land.py           # fase 4: erros e encerramento
-├── CONTEXT.md        # este arquivo
+├── .github/
+│   └── copilot-instructions.md  # este arquivo — contexto do projeto
+├── SESSION.md        # estado atual da sessão de desenvolvimento
 └── pyproject.toml    # dependências gerenciadas pelo uv
 ```
 
@@ -45,6 +49,7 @@ tmgit-py/
 - `gitpython` — interação com git (substitui chamadas shell ao git)
 - Python 3.14 (já instalado via Homebrew)
 - `uv` para gerenciamento de ambiente virtual e dependências
+- `pytest` — testes automatizados (dependência de desenvolvimento)
 
 ---
 
@@ -73,11 +78,11 @@ tmgit-py/
 5. Encerra com status e mensagens (`land`)
 
 ### Comandos suportados
-- `tmgit.py [diretorio]` — executa o fluxo completo
-- `tmgit.py [diretorio] add-file [arquivo]` — adiciona arquivo ao rastreamento
-- `tmgit.py [diretorio] del-file [arquivo]` — remove arquivo do rastreamento
-- `tmgit.py [diretorio] push-remote` — push para repositórios remotos
-- `tmgit.py --version` — exibe versão
+- `main.py [diretorio]` — executa o fluxo completo
+- `main.py [diretorio] add-file [arquivo]` — adiciona arquivo ao rastreamento
+- `main.py [diretorio] del-file [arquivo]` — remove arquivo do rastreamento
+- `main.py [diretorio] push-remote` — push para repositórios remotos
+- `main.py --version` — exibe versão
 
 ### Regras de negócio importantes
 - O `.gitignore` sempre começa com `*` — nada é versionado por padrão
@@ -95,7 +100,7 @@ O projeto adota SDD como metodologia de desenvolvimento. A especificação do co
 ### Fonte de especificações
 
 As especificações derivam de três fontes já existentes no projeto:
-1. Este `CONTEXT.md` — comportamento esperado de cada fase
+1. Este `.github/copilot-instructions.md` — comportamento esperado de cada fase
 2. Os scripts shell de referência (`fm_preflight.sh`, `fm_climb.sh` etc.) — especificações vivas
 3. O guia modo-avião — contratos entre as fases
 
@@ -179,6 +184,25 @@ QUANDO fly() for chamado
 ENTÃO deve fazer push para todos os remotos configurados
 ```
 
+#### add_file() e del_file() — especificações para v0.4.0
+```
+DADO que add-file é passado como argumento com um caminho válido
+QUANDO fly() for chamado
+ENTÃO deve executar git add -f no arquivo informado antes do commit
+
+DADO que del-file é passado como argumento com um arquivo rastreado
+QUANDO fly() for chamado
+ENTÃO deve executar git rm --cached no arquivo informado
+
+DADO que o arquivo passado para add-file não existe
+QUANDO fly() for chamado
+ENTÃO deve chamar land() com error_level=1 e mensagem de arquivo não encontrado
+
+DADO que o arquivo passado para del-file não está rastreado
+QUANDO fly() for chamado
+ENTÃO deve chamar land() com error_level=1 e mensagem de arquivo não rastreado
+```
+
 ### Ciclo SDD por feature
 
 ```
@@ -231,7 +255,7 @@ O `etckeeper` é a ferramenta mais próxima conceitualmente — versiona diretó
 
 - Projeto original: `linux-time-machine.sh`
 - Reescrita em shell: `tmgit`
-- Guia de boas práticas: modo-avião
+- Guia de boas práticas: modo-avião (tag de referência: `modo-aviao@v1.2`)
 - Autor: Eduardo Lisboa <eduardo.lisboa@gmail.com>
 
 ---
@@ -304,6 +328,7 @@ Usar emojis semânticos no início da mensagem:
 - Não implementar tudo de uma vez — uma função por sessão
 - A função principal de cada fase deve ter o mesmo nome da fase: `preflight()`, `climb()`, `fly()`, `land()`
 - O fluxo completo legível no main.py deve ser: `preflight() → climb() → fly() → land()`
+- **Consistência de caminhos:** sempre reutilizar variáveis de caminho já calculadas. Exemplo: usar `os.path.join(tmgit_dir, 'index.lock')` em vez de reconstruir o caminho completo.
 - **Propriedades do gitpython:** usar `repo.bare` (não `repo.bare()`), `repo.is_dirty()` (este sim é método). Sempre verificar se é propriedade ou método antes de usar.
 
 ### Sobre o SESSION.md
@@ -320,8 +345,9 @@ O `SESSION.md` é o ponto de entrada para retomar o projeto em uma nova sessão 
 
 ### Como usar este arquivo no Copilot Chat
 
-O Copilot Chat **não injeta o CONTEXT.md automaticamente**. Para garantir que o agente tenha contexto do projeto, sempre inicie uma nova sessão com:
+O Copilot Chat injeta `.github/copilot-instructions.md` automaticamente em todas as sessões do workspace. Não é necessário referenciar manualmente.
 
-```
-@CONTEXT.md Vamos trabalhar no tmgit-py. [sua instrução aqui]
+Para o aider no terminal, referencie explicitamente ao iniciar a sessão:
+```bash
+aider .github/copilot-instructions.md SESSION.md
 ```
