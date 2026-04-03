@@ -30,6 +30,8 @@ def make_context(tmp_path):
         'land_caller': 'preflight',
         'land_msg': 'Preflight concluído com sucesso',
         'land_errmsg': '',
+        'command': None,
+        'command_target': None,
         'push_remote_requested': False
     }
 
@@ -223,6 +225,120 @@ class TestFlyPush:
         result_context = fly(context)
 
         # Deve retornar com sucesso
+        assert result_context['land_errlvl'] == 0
+
+
+class TestFlyCommands:
+    """Testes para comandos via context['command'] dentro do fly()."""
+
+    def test_fly_add_file_traces_file(self, tmp_path):
+        """DADO command='add-file' e command_target existente
+        QUANDO fly() for chamado
+        ENTÃO o arquivo deve estar rastreado no index do repositório
+        """
+        context = make_context(tmp_path)
+        test_file = os.path.join(context['tmgit_tree'], 'new.txt')
+        os.makedirs(os.path.dirname(test_file), exist_ok=True)
+        with open(test_file, 'w') as f:
+            f.write('conteudo')
+
+        context = climb(context)
+        context['command'] = 'add-file'
+        context['command_target'] = 'new.txt'
+
+        result_context = fly(context)
+
+        repo = Repo(context['tmgit_tree'])
+        assert 'new.txt' in [path for path, _ in repo.index.entries.keys()]
+        assert result_context['land_errlvl'] == 0
+
+    def test_fly_add_file_missing_raises_systemexit(self, tmp_path):
+        """DADO command='add-file' e arquivo inexistente
+        QUANDO fly() for chamado
+        ENTÃO deve encerrar com sys.exit(1)
+        """
+        context = make_context(tmp_path)
+        context = climb(context)
+        context['command'] = 'add-file'
+        context['command_target'] = 'missing.txt'
+
+        with pytest.raises(SystemExit) as exc_info:
+            fly(context)
+
+        assert exc_info.value.code == 1
+
+    def test_fly_add_file_relative_path(self, tmp_path):
+        """DADO command='add-file' e command_target relativo
+        QUANDO fly() for chamado
+        ENTÃO deve resolver caminho relativo e rastrear o arquivo
+        """
+        context = make_context(tmp_path)
+        test_file = os.path.join(context['tmgit_tree'], 'subdir', 'item.txt')
+        os.makedirs(os.path.dirname(test_file), exist_ok=True)
+        with open(test_file, 'w') as f:
+            f.write('conteudo')
+
+        context = climb(context)
+        context['command'] = 'add-file'
+        context['command_target'] = os.path.join('subdir', 'item.txt')
+
+        result_context = fly(context)
+
+        repo = Repo(context['tmgit_tree'])
+        assert os.path.join('subdir', 'item.txt') in [path for path, _ in repo.index.entries.keys()]
+        assert result_context['land_errlvl'] == 0
+
+    def test_fly_del_file_untracks_file(self, tmp_path):
+        """DADO command='del-file' e arquivo rastreado
+        QUANDO fly() for chamado
+        ENTÃO o arquivo não deve mais estar no index
+        """
+        context = make_context(tmp_path)
+        context = climb(context)
+        repo = Repo(context['tmgit_tree'])
+
+        test_file = os.path.join(context['tmgit_tree'], 'tracked.txt')
+        with open(test_file, 'w') as f:
+            f.write('content')
+        repo.index.add(['tracked.txt'])
+        repo.index.commit('track file')
+
+        context['command'] = 'del-file'
+        context['command_target'] = 'tracked.txt'
+
+        result_context = fly(context)
+
+        repo = Repo(context['tmgit_tree'])
+        assert 'tracked.txt' not in [path for path, _ in repo.index.entries.keys()]
+        assert result_context['land_errlvl'] == 0
+
+    def test_fly_del_file_not_tracked_raises_systemexit(self, tmp_path):
+        """DADO command='del-file' e arquivo não rastreado
+        QUANDO fly() for chamado
+        ENTÃO deve encerrar com sys.exit(1)
+        """
+        context = make_context(tmp_path)
+        context = climb(context)
+        context['command'] = 'del-file'
+        context['command_target'] = 'nottracked.txt'
+
+        with pytest.raises(SystemExit) as exc_info:
+            fly(context)
+
+        assert exc_info.value.code == 1
+
+    def test_fly_push_remote_no_remotes(self, tmp_path):
+        """DADO command='push-remote' e sem remotos
+        QUANDO fly() for chamado
+        ENTÃO deve retornar contexto com land_errlvl=0
+        """
+        context = make_context(tmp_path)
+        context = climb(context)
+        context['command'] = 'push-remote'
+        context['command_target'] = None
+
+        result_context = fly(context)
+
         assert result_context['land_errlvl'] == 0
 
 
