@@ -48,7 +48,7 @@ git checkout develop
 git checkout -b feature/add-del-file
 ```
 
-### 2. Escrever especificações SDD no CONTEXT.md antes de codar
+### 2. Escrever especificações SDD no .github/copilot-instructions.md antes de codar
 
 ### 3. Implementar add-file e del-file
 Mudanças necessárias:
@@ -76,7 +76,7 @@ Mudanças necessárias:
 - `fly.py` — implementar `add_file()` e `del_file()` e executar
   antes do commit quando comando estiver no contexto
 
-Especificações SDD a escrever no CONTEXT.md antes de codar.
+Especificações SDD a escrever no .github/copilot-instructions.md antes de codar.
 
 ---
 
@@ -114,7 +114,7 @@ do tempo). O projeto segue o padrão arquitetural "modo-avião" com quatro
 fases: preflight, climb, fly e land.
 
 Você está atuando como Project Manager — decisões de arquitetura,
-revisão de código gerado pelo Copilot e atualização do CONTEXT.md.
+revisão de código gerado pelo Copilot e atualização do .github/copilot-instructions.md.
 O Copilot Chat no VS Code cuida da geração técnica do código.
 
 Estado atual: land.py completo e mergeado na develop. preflight.py
@@ -136,7 +136,7 @@ Repositórios de referência:
 - Funções principais nomeadas igual à fase: `land()`, `preflight()`, `climb()`, `fly()`
 - Contexto passado entre fases via dicionário Python
 - Sempre reutilizar variáveis de caminho já calculadas
-- `copilot-instructions.md` é hardlink do `CONTEXT.md` — editar apenas o `CONTEXT.md`
+- `copilot-instructions.md` é hardlink do `.github/copilot-instructions.md` — editar apenas o `.github/copilot-instructions.md`
 - Git flow incremental: feature → develop → master
 - Commits com emojis semânticos
 - `[tool.uv] package = false` no pyproject.toml — projeto de scripts, não pacote

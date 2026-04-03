@@ -11,7 +11,7 @@ Este é um projeto "Build to Learn": o objetivo principal é aprender Python e g
 ---
 
 ## Arquitetura: padrão modo-avião
-
+> Atualização de 2026-04-02: o guia "modo-aviao" foi refinado para ser mais objetivo, mantendo as quatro fases com responsabilidades bem definidas (tag de referência: `modo-aviao@v1.2`).
 Todo o código segue o guia de boas práticas "modo-avião". As quatro fases são obrigatórias e cada uma tem responsabilidade exclusiva:
 
 | Fase | Arquivo | Responsabilidade |
@@ -304,7 +304,7 @@ Usar emojis semânticos no início da mensagem:
 - Não implementar tudo de uma vez — uma função por sessão
 - A função principal de cada fase deve ter o mesmo nome da fase: `preflight()`, `climb()`, `fly()`, `land()`
 - O fluxo completo legível no main.py deve ser: `preflight() → climb() → fly() → land()`
-- **Consistência de caminhos:** sempre reutilizar variáveis de caminho já calculadas. Exemplo: usar `os.path.join(tmgit_dir, 'index.lock')` em vez de reconstruir `os.path.join(tmgit_tree, '.tmgit', '.git', 'index.lock')`. Se uma variável de caminho já existe, usá-la como base para caminhos derivados.
+- **Propriedades do gitpython:** usar `repo.bare` (não `repo.bare()`), `repo.is_dirty()` (este sim é método). Sempre verificar se é propriedade ou método antes de usar.
 
 ### Sobre o SESSION.md
 
