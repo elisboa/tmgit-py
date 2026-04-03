@@ -2,6 +2,7 @@
 Este módulo contém a lógica principal: commit, tag, push.
 """
 
+import os
 from git import Repo
 from git.exc import GitCommandError
 from land import land
@@ -73,40 +74,88 @@ def push_remote(repo) -> None:
         raise Exception(f"Erro ao fazer push: {str(e)}")
 
 
+def add_file(repo, filepath: str, tmgit_tree: str) -> None:
+    """Adiciona um arquivo ao índice (forçando rastreamento)."""
+
+    # Resolver caminho absoluto
+    if os.path.isabs(filepath):
+        filepath_abs = filepath
+    else:
+        filepath_abs = os.path.join(tmgit_tree, filepath)
+
+    if not os.path.exists(filepath_abs):
+        raise Exception(f"Arquivo para add-file não encontrado: {filepath_abs}")
+
+    # Índice trabalha com paths relativos à work tree. Garantir que é relativo
+    rel_path = os.path.relpath(filepath_abs, tmgit_tree)
+    repo.index.add([rel_path])
+
+
+def del_file(repo, filepath: str, tmgit_tree: str) -> None:
+    """Remove o arquivo do índice (untrack)."""
+
+    if os.path.isabs(filepath):
+        filepath_abs = filepath
+    else:
+        filepath_abs = os.path.join(tmgit_tree, filepath)
+
+    rel_path = os.path.relpath(filepath_abs, tmgit_tree)
+
+    if rel_path not in [path for path, _ in repo.index.entries.keys()]:
+        raise Exception(f"Arquivo não rastreado: {rel_path}")
+
+    repo.index.remove([rel_path])
+
+
 def fly(context: dict) -> dict:
-    """Executa a lógica principal: commit, tag e push.
-
-    Recebe o dicionário de contexto do climb(), verifica mudanças,
-    commita arquivos rastreados, aplica tag e faz push. Em caso de erro,
-    chama land().
-
-    Args:
-        context (dict): Dicionário com variáveis inicializadas pelo climb().
-
-    Returns:
-        dict: Dicionário de contexto atualizado.
-    """
+    """Executa a lógica principal: commit, tag e push ou comando específico."""
 
     tmgit_tree = context['tmgit_tree']
     commit_date = context['commit_date']
     push_remote_requested = context.get('push_remote_requested', False)
+    command = context.get('command')
+    command_target = context.get('command_target')
 
     try:
-        # Abrir o repositório pelo work_tree
         repo = Repo(tmgit_tree)
 
-        # Tentar commitar arquivos modificados
+        if command == 'add-file':
+            if not command_target:
+                raise Exception('add-file requer argumento command_target')
+            add_file(repo, command_target, tmgit_tree)
+
+            context['land_caller'] = 'fly'
+            context['land_msg'] = f"add-file {command_target} concluído"
+            context['land_errlvl'] = 0
+            return context
+
+        if command == 'del-file':
+            if not command_target:
+                raise Exception('del-file requer argumento command_target')
+            del_file(repo, command_target, tmgit_tree)
+
+            context['land_caller'] = 'fly'
+            context['land_msg'] = f"del-file {command_target} concluído"
+            context['land_errlvl'] = 0
+            return context
+
+        if command == 'push-remote':
+            push_remote(repo)
+
+            context['land_caller'] = 'fly'
+            context['land_msg'] = 'push-remote concluído'
+            context['land_errlvl'] = 0
+            return context
+
+        # Fluxo normal (sem comando ou command == None)
         commit_done = commit_files(repo, commit_date)
 
-        # Se houve commit, aplicar tag
         if commit_done:
             tag_commit(repo, commit_date)
 
-        # Se push foi solicitado, fazer push para os remotos
         if push_remote_requested:
             push_remote(repo)
 
-        # Atualizar contexto
         context['land_caller'] = 'fly'
         context['land_msg'] = 'Fly concluído com sucesso'
         context['land_errlvl'] = 0
@@ -114,6 +163,5 @@ def fly(context: dict) -> dict:
         return context
 
     except Exception as e:
-        # Tratar erros passando para a fase land
-        land(1, "fly", f"Erro ao executar voo em {tmgit_tree}",
-             f"Detalhes: {str(e)}")
+        land(1, 'fly', f'Erro ao executar voo em {tmgit_tree}',
+             f'Detalhes: {str(e)}')

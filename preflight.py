@@ -69,6 +69,32 @@ def preflight():
     land_msg = "Preflight concluído com sucesso"
     land_errmsg = ""
 
+    # Detectar argumento opcional de comando e alvo
+    valid_commands = ['add-file', 'del-file', 'push-remote']
+
+    command_detected = None
+    command_target_detected = None
+
+    if len(args) > 1:
+        command = args[1]
+        target = args[2] if len(args) > 2 else None
+
+        # Validar comando
+        if command not in valid_commands:
+            land(1, "preflight", f"Comando inválido: {command}",
+                 "Comandos válidos: add-file, del-file, push-remote")
+
+        # Verificar comando que requer target
+        if command in ['add-file', 'del-file'] and len(args) == 2:
+            land(1, "preflight", f"Comando {command} requer arquivo alvo",
+                 "Uso: tmgit.py [diretório] add-file <arquivo> | del-file <arquivo>")
+
+        command_detected = command
+        command_target_detected = target
+    else:
+        command_detected = None
+        command_target_detected = None
+
     # Retornar dicionário de contexto
     context = {
         'tmgit_tree': tmgit_tree,
@@ -78,7 +104,9 @@ def preflight():
         'land_errlvl': land_errlvl,
         'land_caller': land_caller,
         'land_msg': land_msg,
-        'land_errmsg': land_errmsg
+        'land_errmsg': land_errmsg,
+        'command': command_detected,
+        'command_target': command_target_detected
     }
 
     return context

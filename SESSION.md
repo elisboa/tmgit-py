@@ -153,5 +153,6 @@ Repositórios de referência:
 - `[tool.uv] package = false` no pyproject.toml — projeto de scripts, não pacote
 - **Metodologia SDD** — especificações DADO/QUANDO/ENTÃO escritas antes do código
 - Testes pytest derivam das especificações e ficam em `tests/`
+- **Fluxo sempre completo:** as quatro fases `preflight → climb → fly → land` são sempre executadas em ordem, sem desvio. O `fly()` decide internamente qual operação executar via `context['command']` — nunca desviar o fluxo antes do `fly()`
 - **Versionamento:** MAJOR.MINOR.PATCH — MINOR para nova feature, PATCH para fix/doc
 - **Próxima tag:** `v0.4.0` para a feature add-file/del-file
