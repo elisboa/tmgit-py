@@ -508,7 +508,7 @@ class TestFlyCompleteFlow:
 
         # Verificar que arquivo foi commitado
         last_commit = list(repo.iter_commits())[0]
-        assert 'file1.txt' in last_commit.message or len(last_commit.parents) > 0
+        assert all(f in last_commit.stats.files for f in files_to_track)
 
     def test_fly_no_untracked_files_in_commit(self, tmp_path):
         """DADO que há um arquivo não-rastreado no diretório
