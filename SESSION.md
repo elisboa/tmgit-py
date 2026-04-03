@@ -151,3 +151,85 @@ Repositórios de referência:
   `ClimbError`, `FlyError`), todas herdando de `TmgitError`
 - **main.py é o piloto único:** único ponto que chama `land()`, captura
   `TmgitError` e decide o pouso
+
+---
+
+## Dívidas técnicas identificadas (revisão pós-v0.5.0)
+
+### 🔴 Alta prioridade
+
+**#novo — except engole ClimbError/FlyError internamente**
+`climb.py` e `fly.py` têm `except Exception` que captura o próprio
+`ClimbError`/`FlyError` lançado internamente, re-embrulhando e perdendo
+a mensagem original.
+Correção: adicionar `except ClimbError: raise` antes do `except Exception`
+em `climb.py`, e o mesmo para `FlyError` em `fly.py`.
+
+### 🟡 Moderado
+
+**#3 — Repo(tmgit_tree) no fly.py depende implicitamente do gitfile**
+`Repo(tmgit_tree)` depende do `.git` file gerado pelo `climb()` com
+`separate_git_dir`. Funciona, mas não está documentado. Risco latente
+de quebra silenciosa se `fly()` for chamado sem `climb()`.
+
+**#4 — add-file e del-file não commitam na mesma execução (intencional)**
+O arquivo entra no índice mas o commit só ocorre na próxima chamada do
+fluxo normal. **Comportamento intencional** — documentar nas specs do
+`copilot-instructions.md`.
+
+**#5 — push_remote_requested é chave órfã no contexto**
+`preflight()` nunca popula `push_remote_requested`. O `fly()` lê via
+`context.get()` com fallback `False`. O comando `push-remote` usa
+`context['command']`, não essa flag. Remover ou documentar.
+
+### 🟢 Menor
+
+**#6 — Variáveis locais intermediárias desnecessárias no preflight()**
+`land_errlvl`, `land_caller`, `land_msg`, `land_errmsg` declaradas como
+variáveis locais antes de entrar no dict — podem ir direto no dict.
+
+**#7 — else redundante no preflight()**
+Bloco `else` após `if len(args) > 1` é redundante — as variáveis já
+foram inicializadas como `None` antes do bloco.
+
+**#8 — Mensagem de commit expõe lista de arquivos rastreados**
+Pode ficar grande e vazar nomes sensíveis para o git log.
+
+---
+
+## Testes com asserções fracas (precisam ser corrigidos)
+
+**1. test_fly_no_untracked_files_in_commit**
+```python
+# Antes (condição satisfeita trivialmente)
+assert 'untracked' not in last_commit.message \
+       or 'tracked.txt' in last_commit.message
+# Depois
+assert 'untracked.txt' not in last_commit.stats.files
+```
+
+**2. test_fly_multiple_files_in_single_commit**
+```python
+# Antes (segunda condição verdadeira para qualquer commit não-inicial)
+assert 'file1.txt' in last_commit.message \
+       or len(last_commit.parents) > 0
+# Depois
+assert all(f in last_commit.stats.files for f in files_to_track)
+```
+
+**3. test_preflight_exits_when_directory_not_writable**
+```python
+# Adicionar no início do teste
+if os.getuid() == 0:
+    pytest.skip("Teste não aplicável rodando como root")
+```
+
+---
+
+## Prioridade para próxima sessão
+
+1. Corrigir `except` que engole `ClimbError`/`FlyError` — risco real
+2. Corrigir as 3 asserções fracas nos testes
+3. Documentar #4 (add-file não commita) como decisão explícita
+4. Limpar #5 (push_remote_requested órfã) e #7 (else redundante)
+5. Itens #6 e #8 são opcionais — baixo risco
