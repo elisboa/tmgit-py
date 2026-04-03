@@ -65,6 +65,8 @@ def climb(context: dict) -> dict:
 
         return context
 
+    except ClimbError:
+        raise
     except Exception as e:
         # Tratar erros lançando ClimbError
         raise ClimbError(

@@ -274,3 +274,22 @@ class TestClimbErrorHandling:
             mock_repo.side_effect = Exception('erro simulado')
             with pytest.raises(ClimbError):
                 climb(context)
+
+    def test_climb_raises_climberror_without_rewrap(self, tmp_path):
+        """DADO que climb() lança ClimbError internamente
+        QUANDO climb() for chamado
+        ENTÃO a ClimbError original deve subir sem re-embrulhamento
+        """
+        from exceptions import ClimbError
+        from unittest.mock import patch
+        context = make_context(tmp_path)
+        with patch('climb.Repo') as mock_repo:
+            mock_repo.side_effect = ClimbError(
+                message="mensagem original",
+                caller="climb",
+                error_message="erro original"
+            )
+            with pytest.raises(ClimbError) as exc_info:
+                climb(context)
+            assert exc_info.value.message == "mensagem original"
+            assert exc_info.value.error_message == "erro original"

@@ -162,6 +162,8 @@ def fly(context: dict) -> dict:
 
         return context
 
+    except FlyError:
+        raise
     except Exception as e:
         raise FlyError(
             message=f"Erro ao executar voo em {tmgit_tree}",

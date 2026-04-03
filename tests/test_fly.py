@@ -615,3 +615,22 @@ class TestFlyErrorPaths:
 
         with pytest.raises(FlyError):
             fly(context)
+
+    def test_fly_raises_flyerror_without_rewrap(self, tmp_path):
+        """DADO que fly() lança FlyError internamente
+        QUANDO fly() for chamado
+        ENTÃO a FlyError original deve subir sem re-embrulhamento
+        """
+        from exceptions import FlyError
+        from unittest.mock import patch
+        context = make_context(tmp_path)
+        with patch('fly.Repo') as mock_repo:
+            mock_repo.side_effect = FlyError(
+                message="mensagem original",
+                caller="fly",
+                error_message="erro original"
+            )
+            with pytest.raises(FlyError) as exc_info:
+                fly(context)
+            assert exc_info.value.message == "mensagem original"
+            assert exc_info.value.error_message == "erro original"
