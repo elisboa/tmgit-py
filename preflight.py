@@ -105,9 +105,6 @@ def preflight():
 
         command_detected = command
         command_target_detected = target
-    else:
-        command_detected = None
-        command_target_detected = None
 
     # Retornar dicionário de contexto
     context = {

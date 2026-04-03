@@ -35,7 +35,6 @@ def make_context(tmp_path):
         'land_errmsg': '',
         'command': None,
         'command_target': None,
-        'push_remote_requested': False
     }
 
 
@@ -211,11 +210,11 @@ class TestFlyPush:
 
     def test_fly_handles_no_remotes_configured(self, tmp_path):
         """DADO que não há remotos configurados
-        QUANDO fly() for chamado com push_remote_requested=True
+        QUANDO fly() for chamado com command='push-remote'
         ENTÃO deve retornar contexto com land_errlvl=0 sem erro
         """
         context = make_context(tmp_path)
-        context['push_remote_requested'] = True
+        context['command'] = 'push-remote'
 
         # Preparar repositório via climb
         context = climb(context)
@@ -508,7 +507,7 @@ class TestFlyCompleteFlow:
 
         # Verificar que arquivo foi commitado
         last_commit = list(repo.iter_commits())[0]
-        assert 'file1.txt' in last_commit.message or len(last_commit.parents) > 0
+        assert all(f in last_commit.stats.files for f in files_to_track)
 
     def test_fly_no_untracked_files_in_commit(self, tmp_path):
         """DADO que há um arquivo não-rastreado no diretório
@@ -543,8 +542,8 @@ class TestFlyCompleteFlow:
         # Obter o último commit
         last_commit = list(repo.iter_commits())[0]
 
-        # Verificar que o arquivo não-rastreado não está no commit
-        assert 'untracked' not in last_commit.message or 'tracked.txt' in last_commit.message
+        # Verificar que o arquivo não-rastreado não está nos arquivos do commit
+        assert 'untracked.txt' not in last_commit.stats.files
 
 
 class TestFlyErrorPaths:
@@ -615,3 +614,22 @@ class TestFlyErrorPaths:
 
         with pytest.raises(FlyError):
             fly(context)
+
+    def test_fly_raises_flyerror_without_rewrap(self, tmp_path):
+        """DADO que fly() lança FlyError internamente
+        QUANDO fly() for chamado
+        ENTÃO a FlyError original deve subir sem re-embrulhamento
+        """
+        from exceptions import FlyError
+        from unittest.mock import patch
+        context = make_context(tmp_path)
+        with patch('fly.Repo') as mock_repo:
+            mock_repo.side_effect = FlyError(
+                message="mensagem original",
+                caller="fly",
+                error_message="erro original"
+            )
+            with pytest.raises(FlyError) as exc_info:
+                fly(context)
+            assert exc_info.value.message == "mensagem original"
+            assert exc_info.value.error_message == "erro original"

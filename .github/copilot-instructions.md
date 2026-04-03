@@ -90,11 +90,35 @@ tmgit-py/
 5. Encerra com status e mensagens (`land`)
 
 ### Comandos suportados
+
 - `main.py [diretorio]` — executa o fluxo completo
 - `main.py [diretorio] add-file [arquivo]` — adiciona arquivo ao rastreamento
 - `main.py [diretorio] del-file [arquivo]` — remove arquivo do rastreamento
 - `main.py [diretorio] push-remote` — push para repositórios remotos
 - `main.py --version` — exibe versão
+
+### Modos de uso
+
+O tmgit-py opera em dois modos distintos:
+
+**Modo automático (cron):**
+Executado periodicamente sem argumentos extras. Detecta alterações
+nos arquivos já indexados e os versiona automaticamente.
+main.py [diretorio]
+Fluxo: preflight → climb → fly (commit + tag) → land
+
+**Modo manual (terminal):**
+Executado pelo usuário para gerenciar quais arquivos são rastreados.
+Não realiza commit — apenas modifica o índice git.
+main.py [diretorio] add-file [arquivo]
+main.py [diretorio] del-file [arquivo]
+Fluxo: preflight → climb → fly (indexa/desindexia) → land
+
+O arquivo indexado via add-file será commitado automaticamente
+na próxima execução do modo automático (cron).
+
+Este comportamento é intencional — add-file e del-file são
+operações de configuração do índice, não de versionamento.
 
 ### Regras de negócio importantes
 - O `.gitignore` sempre começa com `*` — nada é versionado por padrão

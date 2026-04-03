@@ -42,6 +42,9 @@ class TestPreflightErrorConditions:
         QUANDO preflight() for chamado
         ENTÃO deve encerrar com sys.exit(1)
         """
+        import os
+        if os.getuid() == 0:
+            pytest.skip("Teste não aplicável rodando como root")
         # Criar um diretório temporário sem permissão de escrita
         test_dir = tmp_path / "readonly"
         test_dir.mkdir()
