@@ -6,8 +6,10 @@ import pytest
 import os
 from datetime import datetime
 from git import Repo
+from git.exc import GitCommandError
+from unittest.mock import patch, MagicMock
 from climb import climb
-from fly import fly
+from fly import fly, commit_files, tag_commit, push_remote
 
 
 def make_context(tmp_path):
@@ -502,3 +504,47 @@ class TestFlyCompleteFlow:
 
         # Verificar que o arquivo não-rastreado não está no commit
         assert 'untracked' not in last_commit.message or 'tracked.txt' in last_commit.message
+
+
+class TestFlyErrorPaths:
+    """Testes para caminhos de erro em funções auxiliares do fly()."""
+
+    def test_commit_files_raises_exception_on_git_error(self, tmp_path):
+        """DADO que repo.index.commit() lança GitCommandError
+        QUANDO commit_files() for chamado
+        ENTÃO deve lançar Exception com mensagem contendo "Erro ao commitar"
+        """
+        with patch('fly.Repo') as mock_repo_class:
+            mock_repo = MagicMock()
+            mock_repo_class.return_value = mock_repo
+            mock_repo.is_dirty.return_value = True
+            mock_repo.index.entries.keys.return_value = [('test.txt', 0)]
+            mock_repo.index.add = MagicMock()
+            mock_repo.index.commit.side_effect = GitCommandError('git commit', 1, b'erro', b'')
+            with pytest.raises(Exception) as exc_info:
+                commit_files(mock_repo, '2024.01.01-12.00.00.000')
+            assert "Erro ao commitar" in str(exc_info.value)
+
+    def test_tag_commit_raises_exception_on_git_error(self, tmp_path):
+        """DADO que repo.create_tag() lança GitCommandError
+        QUANDO tag_commit() for chamado
+        ENTÃO deve lançar Exception com mensagem contendo "Erro ao criar tag"
+        """
+        mock_repo = MagicMock()
+        mock_repo.create_tag.side_effect = GitCommandError('git tag', 1, b'erro', b'')
+        with pytest.raises(Exception) as exc_info:
+            tag_commit(mock_repo, '2024.01.01-12.00.00.000')
+        assert "Erro ao criar tag" in str(exc_info.value)
+
+    def test_push_remote_raises_exception_on_git_error(self, tmp_path):
+        """DADO que remote.push() lança GitCommandError
+        QUANDO push_remote() for chamado com remotos configurados
+        ENTÃO deve lançar Exception com mensagem contendo "Erro ao fazer push"
+        """
+        mock_repo = MagicMock()
+        mock_remote = MagicMock()
+        mock_remote.push.side_effect = GitCommandError('git push', 1, b'erro', b'')
+        mock_repo.remotes = [mock_remote]
+        with pytest.raises(Exception) as exc_info:
+            push_remote(mock_repo)
+        assert "Erro ao fazer push" in str(exc_info.value)
