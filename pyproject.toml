@@ -20,3 +20,7 @@ dev = [
     "pytest-cov>=7.1.0",
 ]
 
+[tool.coverage.report]
+exclude_lines = [
+    "if __name__ == .__main__.:"
+]
