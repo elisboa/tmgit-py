@@ -5,7 +5,7 @@ Este módulo prepara o repositório: git init, branch, gitignore.
 import os
 from git import Repo
 from git.exc import InvalidGitRepositoryError
-from land import land
+from exceptions import ClimbError
 
 
 def climb(context: dict) -> dict:
@@ -66,6 +66,8 @@ def climb(context: dict) -> dict:
         return context
 
     except Exception as e:
-        # Tratar erros passando para a fase land
-        land(1, "climb", f"Erro ao preparar repositório em {tmgit_dir}",
-             f"Detalhes: {str(e)}")
+        # Tratar erros lançando ClimbError
+        raise ClimbError(
+            message=f"Erro ao preparar repositório em {tmgit_dir}",
+            caller="climb",
+            error_message=f"Detalhes: {str(e)}")

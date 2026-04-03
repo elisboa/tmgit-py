@@ -6,6 +6,7 @@ import pytest
 import sys
 from unittest.mock import patch, MagicMock, call
 from main import main
+from exceptions import PreflightError
 
 
 class TestMainSuccessFlow:
@@ -109,4 +110,30 @@ class TestMainErrorFlow:
                 'preflight',
                 'Pré-voo falhou',
                 'erro precoce'
+            )
+
+    def test_main_calls_land_when_preflight_raises_tmgiterror(self):
+        """DADO que preflight() lança PreflightError
+        QUANDO main() for chamado
+        ENTÃO land() deve ser chamado com error_level=1 e os dados da exceção
+        """
+        with patch('main.preflight') as mock_preflight, \
+             patch('main.land') as mock_land:
+
+            mock_preflight.side_effect = PreflightError(
+                message="Diretório não existe",
+                caller="preflight",
+                error_message="Erro simulado"
+            )
+            mock_land.side_effect = SystemExit(1)
+
+            with pytest.raises(SystemExit) as exc_info:
+                main()
+
+            assert exc_info.value.code == 1
+            mock_land.assert_called_once_with(
+                1,
+                "preflight",
+                "Diretório não existe",
+                "Erro simulado"
             )

@@ -8,6 +8,7 @@ from datetime import datetime
 from git import Repo
 from unittest.mock import patch
 from climb import climb
+from exceptions import PreflightError, ClimbError, FlyError, TmgitError
 
 
 def make_context(tmp_path):
@@ -271,6 +272,5 @@ class TestClimbErrorHandling:
 
         with patch('climb.Repo') as mock_repo:
             mock_repo.side_effect = Exception('erro simulado')
-            with pytest.raises(SystemExit) as exc_info:
+            with pytest.raises(ClimbError):
                 climb(context)
-            assert exc_info.value.code == 1
