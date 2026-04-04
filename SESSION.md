@@ -62,6 +62,14 @@ uv run pytest tests/ --cov=. --cov-report=term-missing
 - 🟢 **#6** — Variáveis locais intermediárias desnecessárias no `preflight()`
 - 🟢 **#8** — Mensagem de commit expõe lista de arquivos rastreados
 
+## Itens menores pendentes (custo zero, corrigir junto com chore/docs)
+
+- 🟢 **docstring desatualizada** — `test_fly_handles_no_remotes_configured` em
+  `tests/test_fly.py` linha 213: docstring poderia descrever melhor o cenário com
+  `command='push-remote'` em vez de apenas mencionar o comando
+- 🟡 **pyproject.toml desatualizado** — `version = "0.1.0"` nunca foi atualizado.
+  Sincronizar para `0.5.1` antes da feature `--version` chegar, pois ela lerá dali
+
 ---
 
 ## Próximas ações
