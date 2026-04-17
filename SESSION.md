@@ -1,7 +1,7 @@
 # SESSION.md — Resumo de sessão tmgit-py
 
-> Atualizado em: 2026-04-03
-> Próxima sessão: chore/docs (README.md) ou itens opcionais #6 e #8
+> Atualizado em: 2026-04-17
+> Próxima sessão: feature/version — implementar `--version` lendo pyproject.toml
 
 ---
 
@@ -20,10 +20,11 @@
 | `v0.4.1` | Qualidade — cobertura de testes 100%, 68 testes |
 | `v0.5.0` | Arquitetura — exceções customizadas, main como piloto único |
 | `v0.5.1` | Qualidade — dívidas técnicas resolvidas, 71 testes |
+| `v0.5.2` | Docs — README.md escrito, copilot-instructions corrigido |
 
 ### Branches
 ```
-master    ← v0.5.1 ✅
+master    ← v0.5.2 ✅
 develop   ← alinhada com master
 ```
 
@@ -62,25 +63,23 @@ uv run pytest tests/ --cov=. --cov-report=term-missing
 - 🟢 **#6** — Variáveis locais intermediárias desnecessárias no `preflight()`
 - 🟢 **#8** — Mensagem de commit expõe lista de arquivos rastreados
 
-## Itens menores pendentes (custo zero, corrigir junto com chore/docs)
+## Itens menores pendentes
 
 - 🟢 **docstring desatualizada** — `test_fly_handles_no_remotes_configured` em
   `tests/test_fly.py` linha 213: docstring poderia descrever melhor o cenário com
   `command='push-remote'` em vez de apenas mencionar o comando
-- 🟡 **pyproject.toml desatualizado** — `version = "0.1.0"` nunca foi atualizado.
-  Sincronizar para `0.5.1` antes da feature `--version` chegar, pois ela lerá dali
 
 ---
 
 ## Próximas ações
 
-### 1. chore/docs — README.md
+### 1. feature/version — implementar `--version`
 ```bash
 git checkout develop
-git checkout -b chore/docs
+git checkout -b feature/version
 ```
-Documentar o projeto de verdade: o que é, como instalar, como usar,
-modos de uso (cron vs manual), exemplos.
+Ler a versão do `pyproject.toml` via `importlib.metadata` ou leitura direta
+e exibir quando `main.py --version` for chamado. Feature pequena e bem delimitada.
 
 ### 2. Itens opcionais #6 e #8 (baixo risco, pode aguardar)
 
@@ -117,8 +116,8 @@ revisão de código gerado pelo Copilot e atualização do
 .github/copilot-instructions.md. O Copilot Chat no VS Code cuida da
 geração técnica do código.
 
-Estado atual: v0.5.1 — 71 testes, dívidas técnicas resolvidas.
-Próximo passo: chore/docs para escrever o README.md.
+Estado atual: v0.5.2 — 71 testes, README.md escrito.
+Próximo passo: feature/version para implementar --version.
 
 Repositórios de referência:
 - linux-time-machine.sh (original em shell)
