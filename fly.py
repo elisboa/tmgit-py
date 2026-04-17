@@ -116,6 +116,9 @@ def fly(context: dict) -> dict:
     command_target = context.get('command_target')
 
     try:
+        # Repo(tmgit_tree) funciona porque o climb() cria um gitfile em
+        # tmgit_tree/.git via separate_git_dir, tornando tmgit_tree uma
+        # worktree válida para o gitpython. Sem esse gitfile, esta linha falha.
         repo = Repo(tmgit_tree)
 
         if command == 'add-file':
