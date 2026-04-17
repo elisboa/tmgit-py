@@ -21,10 +21,11 @@
 | `v0.5.0` | Arquitetura — exceções customizadas, main como piloto único |
 | `v0.5.1` | Qualidade — dívidas técnicas resolvidas, 71 testes |
 | `v0.5.2` | Docs — README.md escrito, copilot-instructions corrigido |
+| `v0.5.3` | Qualidade — dívidas técnicas opcionais resolvidas (#3, #6, #8) |
 
 ### Branches
 ```
-master    ← v0.5.2 ✅
+master    ← v0.5.3 ✅
 develop   ← alinhada com master
 ```
 
@@ -56,18 +57,12 @@ uv run pytest tests/ --cov=. --cov-report=term-missing
 - ✅ **#5** — `push_remote_requested` órfã removida do `fly.py` e testes
 - ✅ **#7** — `else` redundante removido do `preflight.py`
 
-## Dívidas técnicas pendentes (opcionais)
+## Dívidas técnicas resolvidas na v0.5.3
 
-- 🟡 **#3** — `Repo(tmgit_tree)` no `fly.py` depende implicitamente do gitfile gerado
-  pelo `climb()` com `separate_git_dir`. Não documentado.
-- 🟢 **#6** — Variáveis locais intermediárias desnecessárias no `preflight()`
-- 🟢 **#8** — Mensagem de commit expõe lista de arquivos rastreados
-
-## Itens menores pendentes
-
-- 🟢 **docstring desatualizada** — `test_fly_handles_no_remotes_configured` em
-  `tests/test_fly.py` linha 213: docstring poderia descrever melhor o cenário com
-  `command='push-remote'` em vez de apenas mencionar o comando
+- ✅ **#3** — Dependência implícita `Repo(tmgit_tree)` documentada com comentário no `fly.py`
+- ✅ **#6** — Variáveis locais desnecessárias removidas do `preflight()` (18 → 14)
+- ✅ **#8** — Mensagem de commit simplificada — não expõe lista de arquivos rastreados
+- ✅ **docstring** — `test_fly_handles_no_remotes_configured` já estava correta (item fechado)
 
 ---
 
@@ -81,7 +76,7 @@ git checkout -b feature/version
 Ler a versão do `pyproject.toml` via `importlib.metadata` ou leitura direta
 e exibir quando `main.py --version` for chamado. Feature pequena e bem delimitada.
 
-### 2. Itens opcionais #6 e #8 (baixo risco, pode aguardar)
+### 2. Sem dívidas técnicas pendentes — código está limpo
 
 ---
 
@@ -116,7 +111,7 @@ revisão de código gerado pelo Copilot e atualização do
 .github/copilot-instructions.md. O Copilot Chat no VS Code cuida da
 geração técnica do código.
 
-Estado atual: v0.5.2 — 71 testes, README.md escrito.
+Estado atual: v0.5.3 — 71 testes, código limpo, sem dívidas técnicas.
 Próximo passo: feature/version para implementar --version.
 
 Repositórios de referência:
