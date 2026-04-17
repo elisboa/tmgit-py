@@ -1,5 +1,11 @@
 # SESSION.md — Resumo de sessão tmgit-py
 
+> **Nota:** Para contexto completo do projeto, padrões de desenvolvimento e fluxos,
+> consulte [`.github/copilot-instructions.md`](.github/copilot-instructions.md).
+>
+> Este arquivo documenta o **estado atual** da sessão (branch ativa, próximas ações).
+> O copilot-instructions.md documenta o **contexto permanente** (arquitetura, instruções).
+
 > Atualizado em: 2026-04-03
 > Próxima sessão: chore/docs (README.md) ou itens opcionais #6 e #8
 
