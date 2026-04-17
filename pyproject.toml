@@ -1,6 +1,6 @@
 [project]
 name = "tmgit-py"
-version = "0.5.1"
+version = "0.5.3"
 description = "Máquina do tempo usando git — reescrita em Python do projeto tmgit"
 authors = [
     { name = "Eduardo Lisboa", email = "eduardo.lisboa@gmail.com" }
