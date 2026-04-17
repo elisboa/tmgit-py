@@ -28,7 +28,7 @@ def commit_files(repo, commit_date: str) -> bool:
     tracked_files = [path for path, _ in repo.index.entries.keys()]
 
     # Preparar mensagem de commit
-    commit_message = f"{', '.join(tracked_files) if tracked_files else 'Arquivos rastreados'}\n\nCommit automático realizado às {commit_date}"
+    commit_message = f"Commit automático — {commit_date}"
 
     try:
         # Fazer git add nos arquivos rastreados
@@ -116,6 +116,9 @@ def fly(context: dict) -> dict:
     command_target = context.get('command_target')
 
     try:
+        # Repo(tmgit_tree) funciona porque o climb() cria um gitfile em
+        # tmgit_tree/.git via separate_git_dir, tornando tmgit_tree uma
+        # worktree válida para o gitpython. Sem esse gitfile, esta linha falha.
         repo = Repo(tmgit_tree)
 
         if command == 'add-file':
