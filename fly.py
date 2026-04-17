@@ -28,7 +28,7 @@ def commit_files(repo, commit_date: str) -> bool:
     tracked_files = [path for path, _ in repo.index.entries.keys()]
 
     # Preparar mensagem de commit
-    commit_message = f"{', '.join(tracked_files) if tracked_files else 'Arquivos rastreados'}\n\nCommit automático realizado às {commit_date}"
+    commit_message = f"Commit automático — {commit_date}"
 
     try:
         # Fazer git add nos arquivos rastreados
