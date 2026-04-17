@@ -372,6 +372,20 @@ Usar emojis semânticos no início da mensagem:
 
 ---
 
+### Versionamento e tagging
+
+O projeto usa versionamento semântico (MAJOR.MINOR.PATCH). A versão canônica fica em `pyproject.toml` no campo `version`.
+
+**Fluxo de release:**
+1. O PM (Claude) define a próxima versão e o desenvolvedor aprova
+2. Antes de criar a tag, atualizar `version` no `pyproject.toml` para a nova versão
+3. Commitar: `git commit pyproject.toml -m ":label: Bump versão para X.Y.Z"`
+4. Criar a tag: `git tag vX.Y.Z`
+
+**Regra obrigatória:** a tag e o campo `version` no `pyproject.toml` devem estar sempre sincronizados. Nunca criar uma tag sem antes atualizar o `pyproject.toml`.
+
+---
+
 ## Instruções para o modelo (aider/LLM)
 
 - Sempre seguir o padrão modo-avião: cada fase em seu arquivo
