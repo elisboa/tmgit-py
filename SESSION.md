@@ -1,7 +1,7 @@
 # SESSION.md — Resumo de sessão tmgit-py
 
 > Atualizado em: 2026-04-03
-> Próxima sessão: chore/docs (README.md) ou itens opcionais #6 e #8
+> Próxima sessão: feature/version-command ou uso real no $HOME
 
 ---
 
@@ -18,93 +18,82 @@
 | `v0.3.1` | Fix docs — corrige referências e histórico de versões |
 | `v0.4.0` | Feature — add-file e del-file implementados |
 | `v0.4.1` | Qualidade — cobertura de testes 100%, 68 testes |
-| `v0.5.0` | Arquitetura — exceções customizadas, main como piloto único |
-| `v0.5.1` | Qualidade — dívidas técnicas resolvidas, 71 testes |
+
+> **Nota:** `v0.3.0` e `v0.2.1` estão fora de ordem semântica — aprendizado de git flow: não reescrever tags já publicadas no remoto.
 
 ### Branches
 ```
-master    ← v0.5.1 ✅
+master    ← v0.4.1 ✅
 develop   ← alinhada com master
 ```
 
 ### Arquivos implementados
 | Arquivo | Cobertura | Testes |
 |---|---|---|
-| `exceptions.py` | 100% | — |
 | `land.py` | 100% | 10/10 |
 | `preflight.py` | 100% | 20/20 |
-| `climb.py` | 100% | 12/12 |
-| `fly.py` | 100% | 25/25 |
-| `main.py` | 100% | 4/4 |
+| `climb.py` | 100% | 11/11 |
+| `fly.py` | 100% | 24/24 |
+| `main.py` | 100% | 3/3 |
 
 ### Suite de testes
 ```bash
 uv run pytest tests/ --cov=. --cov-report=term-missing
-# 71 passed — 99% coverage (linha 47 do test_preflight é pytest.skip, esperado)
+# 68 passed — 100% coverage
 ```
 
 ---
 
-## Dívidas técnicas resolvidas na v0.5.1
+## Próximas ações imediatas
 
-- ✅ **#novo** — `except` que engolia `ClimbError`/`FlyError` corrigido
-- ✅ **Asserção fraca 1** — `test_fly_no_untracked_files_in_commit` usa `last_commit.stats.files`
-- ✅ **Asserção fraca 2** — `test_fly_multiple_files_in_single_commit` usa `last_commit.stats.files`
-- ✅ **Asserção fraca 3** — `test_preflight_exits_when_directory_not_writable` tem skip para root
-- ✅ **#4** — comportamento de `add-file`/`del-file` documentado no `copilot-instructions.md`
-- ✅ **#5** — `push_remote_requested` órfã removida do `fly.py` e testes
-- ✅ **#7** — `else` redundante removido do `preflight.py`
-
-## Dívidas técnicas pendentes (opcionais)
-
-- 🟡 **#3** — `Repo(tmgit_tree)` no `fly.py` depende implicitamente do gitfile gerado
-  pelo `climb()` com `separate_git_dir`. Não documentado.
-- 🟢 **#6** — Variáveis locais intermediárias desnecessárias no `preflight()`
-- 🟢 **#8** — Mensagem de commit expõe lista de arquivos rastreados
-
-## Itens menores pendentes (custo zero, corrigir junto com chore/docs)
-
-- 🟢 **docstring desatualizada** — `test_fly_handles_no_remotes_configured` em
-  `tests/test_fly.py` linha 213: docstring poderia descrever melhor o cenário com
-  `command='push-remote'` em vez de apenas mencionar o comando
-- 🟡 **pyproject.toml desatualizado** — `version = "0.1.0"` nunca foi atualizado.
-  Sincronizar para `0.5.1` antes da feature `--version` chegar, pois ela lerá dali
-
----
-
-## Próximas ações
-
-### 1. chore/docs — README.md
+### 1. Uso real no $HOME
 ```bash
-git checkout develop
-git checkout -b chore/docs
-```
-Documentar o projeto de verdade: o que é, como instalar, como usar,
-modos de uso (cron vs manual), exemplos.
+# Inicializar repositório no $HOME
+uv run python ~/git/github/elisboa/tmgit-py/main.py ~
 
-### 2. Itens opcionais #6 e #8 (baixo risco, pode aguardar)
+# Rastrear arquivos importantes
+uv run python ~/git/github/elisboa/tmgit-py/main.py ~ add-file .zshrc
+uv run python ~/git/github/elisboa/tmgit-py/main.py ~ add-file .gitconfig
+
+# Rodar via cron (exemplo — a cada hora)
+0 * * * * cd ~/git/github/elisboa/tmgit-py && uv run python main.py ~
+```
+
+### 2. Possíveis próximas features (v0.5.0)
+- `--version` flag para exibir versão atual
+- Modo `version-all` — versionar todos os arquivos do diretório
+- Arquivo de configuração `.tmgit.conf`
+- Suporte a múltiplos diretórios em uma única chamada
 
 ---
 
 ## Setup do ambiente (caso precise reconfigurar)
 
 ```bash
+# Clonar e instalar
 git clone https://github.com/elisboa/tmgit-py
 cd tmgit-py
 uv sync
-uv run pytest tests/ --cov=. --cov-report=term-missing
-# Esperado: 71 passed, 99% coverage
 
+# Validar
+uv run pytest tests/ --cov=. --cov-report=term-missing
+# Esperado: 68 passed, 100% coverage
+
+# Modelos Ollama
 ollama pull qwen2.5-coder:7b   # aider no terminal
 ollama pull qwen2.5-coder:3b   # Continue.dev chat
 ollama pull opencoder:1.5b     # Continue.dev autocomplete
 
+# Iniciar aider com contexto do projeto
+cd ~/git/github/elisboa/tmgit-py
 aider .github/copilot-instructions.md SESSION.md
 ```
 
 ---
 
 ## Como iniciar uma nova sessão no Claude
+
+Cole este bloco no início da conversa:
 
 ```
 Olá! Estou retomando o projeto tmgit-py, uma reescrita em Python de um
@@ -117,8 +106,9 @@ revisão de código gerado pelo Copilot e atualização do
 .github/copilot-instructions.md. O Copilot Chat no VS Code cuida da
 geração técnica do código.
 
-Estado atual: v0.5.1 — 71 testes, dívidas técnicas resolvidas.
-Próximo passo: chore/docs para escrever o README.md.
+Estado atual: v0.4.1 — 68 testes, 100% de cobertura.
+add-file e del-file implementados e validados.
+Próximo passo: uso real no $HOME ou nova feature.
 
 Repositórios de referência:
 - linux-time-machine.sh (original em shell)
@@ -135,21 +125,16 @@ Repositórios de referência:
 - Funções principais nomeadas igual à fase: `land()`, `preflight()`, `climb()`, `fly()`
 - Contexto passado entre fases via dicionário Python
 - Sempre reutilizar variáveis de caminho já calculadas
-- Documentação unificada em `.github/copilot-instructions.md`
+- Documentação unificada em `.github/copilot-instructions.md` — não existe mais `CONTEXT.md`
 - Git flow incremental: feature → develop → master
 - Merge commits com `--no-ff` e emoji `:twisted_rightwards_arrows:`
-- Commits com emojis semânticos — `git commit ARQUIVO -m "mensagem"`
-- `[tool.uv] package = false` no pyproject.toml
-- **Metodologia SDD** — especificações DADO/QUANDO/ENTÃO antes do código
+- Commits com emojis semânticos
+- `[tool.uv] package = false` no pyproject.toml — projeto de scripts, não pacote
+- **Metodologia SDD** — especificações DADO/QUANDO/ENTÃO escritas antes do código
 - Testes pytest derivam das especificações e ficam em `tests/`
-- **Fluxo sempre completo:** `preflight → climb → fly → land`
+- **Fluxo sempre completo:** `preflight → climb → fly → land` — nunca desviar antes do `fly()`
 - O `fly()` decide qual operação executar via `context['command']`
-- **Versionamento:** MAJOR.MINOR.PATCH
+- **Versionamento:** MAJOR.MINOR.PATCH — MINOR para nova feature, PATCH para fix/doc
 - `del_file()` verifica rastreamento no index, não existência no disco
 - `if __name__ == "__main__":` excluído da cobertura via `pyproject.toml`
-- Atributos read-only do gitpython testados via `unittest.mock.MagicMock`
-- **Exceções customizadas:** `PreflightError`, `ClimbError`, `FlyError` herdam de `TmgitError`
-- **main.py é o piloto único:** captura `TmgitError` e chama `land()`
-- **add-file/del-file** são operações de índice — não commitam na mesma execução
-- `push_remote_requested` removida — push via `context['command'] = 'push-remote'`
-- `except ClimbError/FlyError: raise` antes de `except Exception` para evitar re-embrulhamento
+- Atributos read-only do gitpython testados via `unittest.mock.MagicMock` em vez de `monkeypatch`
