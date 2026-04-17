@@ -50,8 +50,7 @@ def preflight():
             error_message="Diretório não acessível")
 
     # Verificar se o binário do git está disponível
-    git_path = shutil.which('git')
-    if not git_path:
+    if not shutil.which('git'):
         raise PreflightError(
             message="Verificação do executável do git",
             caller="preflight",
@@ -80,17 +79,15 @@ def preflight():
     land_errmsg = ""
 
     # Detectar argumento opcional de comando e alvo
-    valid_commands = ['add-file', 'del-file', 'push-remote']
-
-    command_detected = None
-    command_target_detected = None
+    command = None
+    command_target = None
 
     if len(args) > 1:
         command = args[1]
-        target = args[2] if len(args) > 2 else None
+        command_target = args[2] if len(args) > 2 else None
 
         # Validar comando
-        if command not in valid_commands:
+        if command not in ['add-file', 'del-file', 'push-remote']:
             raise PreflightError(
                 message=f"Comando inválido: {command}",
                 caller="preflight",
@@ -103,9 +100,6 @@ def preflight():
                 caller="preflight",
                 error_message="Uso: tmgit.py [diretório] add-file <arquivo> | del-file <arquivo>")
 
-        command_detected = command
-        command_target_detected = target
-
     # Retornar dicionário de contexto
     context = {
         'tmgit_tree': tmgit_tree,
@@ -116,8 +110,8 @@ def preflight():
         'land_caller': land_caller,
         'land_msg': land_msg,
         'land_errmsg': land_errmsg,
-        'command': command_detected,
-        'command_target': command_target_detected
+        'command': command,
+        'command_target': command_target
     }
 
     return context
