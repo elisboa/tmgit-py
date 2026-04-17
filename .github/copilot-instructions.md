@@ -23,6 +23,25 @@ Todo o código segue o guia de boas práticas "modo-avião". As quatro fases sã
 | `fly` | `fly.py` | Lógica principal: git add, commit, tag, push |
 | `land` | `land.py` | Tratamento de erros, logs, encerramento |
 
+---
+
+### Diagrama de dependências dos módulos principais
+
+```mermaid
+graph TD
+    main --> exceptions
+    main --> preflight
+    main --> climb
+    main --> fly
+    main --> land
+    preflight --> exceptions
+    climb --> exceptions
+    fly --> exceptions
+```
+
+**Nota arquitetural:**
+O arquivo `exceptions.py` funciona como um contrato neutro entre todas as fases e o orquestrador (`main.py`). Ele define a estrutura dos erros (message, caller, error_message) que podem ser lançados por qualquer fase e capturados centralizadamente. Isso evita acoplamento entre fases e mantém o fluxo limpo e flexível, alinhado ao padrão modo-avião. Não é recomendado mover essas exceções para dentro de uma fase ou para o land.py, pois isso criaria dependências cruzadas desnecessárias.
+
 **Regra fundamental:** nenhuma lógica de negócio fora da fase `fly`. Nenhum encerramento fora da fase `land`.
 
 **Regra de fluxo obrigatória:** as quatro fases são sempre executadas em ordem, sem exceção. Nunca desviar o fluxo antes do `fly()`. O `fly()` decide internamente qual operação executar com base no contexto:
